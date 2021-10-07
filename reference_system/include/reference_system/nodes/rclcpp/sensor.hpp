@@ -39,6 +39,9 @@ public:
       [this] {timer_callback();});
   }
 
+  // To access callback variable for PiCAS
+  rclcpp::TimerBase::SharedPtr get_callback() {return timer_;}
+  
 private:
   void timer_callback()
   {

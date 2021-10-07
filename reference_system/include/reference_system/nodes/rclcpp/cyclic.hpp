@@ -53,6 +53,9 @@ public:
       [this] {timer_callback();});
   }
 
+  // To access callback variable for PiCAS
+  rclcpp::TimerBase::SharedPtr get_callback() {return timer_;}
+
 private:
   void input_callback(
     const uint64_t input_number,
