@@ -57,9 +57,14 @@ ament_auto_add_executable(number_cruncher_benchmark
   src/ros2/number_cruncher_benchmark.cpp
 )
 
-# Single Threaded Executor
+# Single Threaded Executor for PiCAS
 ament_auto_add_executable(autoware_default_singlethreaded_picas
   src/ros2/executor/autoware_default_singlethreaded_picas.cpp
+)
+
+# Single Threaded Executor for node
+ament_auto_add_executable(autoware_default_singlethreaded_node
+  src/ros2/executor/autoware_default_singlethreaded_node.cpp
 )
 
 # Add new executors to test here

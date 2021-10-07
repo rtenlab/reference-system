@@ -43,7 +43,7 @@ public:
 
   // To access callback variable for PiCAS
   rclcpp::Subscription<message_t>::SharedPtr get_callback() {return subscription_;}
-  
+
 private:
   void input_callback(const message_t::SharedPtr input_message) const
   {
