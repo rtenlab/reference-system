@@ -99,6 +99,7 @@ if(${BUILD_TESTING})
       autoware_default_singlethreaded
       autoware_default_staticsinglethreaded
       autoware_default_multithreaded
+      autoware_default_singlethreaded_picas
       #autoware_default_custom
     )
 
