@@ -172,6 +172,7 @@ int main(int argc, char * argv[])
       "Lanelet2GlobalPlanner", "Lanelet2MapLoader",
       "ParkingPlanner", "LanePlanner"};
   cyclic.output_topic = "BehaviorPlanner";
+  cyclic.cycle_time = TimeConfig::BEHAVIOR_PLANNER_CYCLE;
   cyclic.number_crunch_limit = TimeConfig::BEHAVIOR_PLANNER;
   auto BehaviorPlanner = std::make_shared<nodes::rclcpp_system::Cyclic>(cyclic);    
 

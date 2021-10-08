@@ -73,8 +73,6 @@ private:
 
     message_cache_[0].reset();
     message_cache_[1].reset();
-
-    std::cout << "[FusionNode] " << this->get_name() << std::endl;
   }
 
 private:

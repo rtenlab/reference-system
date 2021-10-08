@@ -63,7 +63,7 @@ private:
   {
     message_cache_[input_number] = input_message;
 
-    std::cout << "[CyclicNodeInputCallback] " << this->get_name() << std::endl;
+    //std::cout << "[CyclicNodeInputCallback] " << this->get_name() << std::endl;
   }
 
   void timer_callback()
@@ -76,6 +76,8 @@ private:
     auto number_cruncher_result = number_cruncher(number_crunch_limit_);
 
     uint64_t sent_samples = 0;
+   
+    
     for (auto & m : local_cache) {
       if (!m) {continue;}
 
@@ -88,7 +90,7 @@ private:
       m.reset();
       ++sent_samples;
     }
-
+    
     if (sent_samples == 0) {
       auto message = publisher_->borrow_loaned_message();
       message.get().size = 0;
@@ -98,7 +100,6 @@ private:
 
       publisher_->publish(std::move(message));
     }
-    std::cout << "[CyclicNodeTimerCallback] " << this->get_name() << std::endl;
   }
 
 private:
