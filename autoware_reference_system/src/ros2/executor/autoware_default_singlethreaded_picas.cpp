@@ -224,7 +224,7 @@ int main(int argc, char * argv[])
   executor.set_callback_priority(NDTLocalizer->get_callback_second(), 20);
   
   executor.set_callback_priority(ObjectCollisionEstimator->get_callback(), 22);
-  executor.set_callback_priority(BehaviorPlanner->get_callback(), 1);
+  executor.set_callback_priority(BehaviorPlanner->get_callback(), 23);
   executor.set_callback_priority(MPCController->get_callback(), 24);
 
   // Multiple callbacks for fusion node  
