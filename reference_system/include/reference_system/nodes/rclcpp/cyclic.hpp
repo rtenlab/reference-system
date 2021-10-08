@@ -62,6 +62,8 @@ private:
     const message_t::SharedPtr input_message)
   {
     message_cache_[input_number] = input_message;
+
+    std::cout << "[CyclicNodeInputCallback] " << this->get_name() << std::endl;
   }
 
   void timer_callback()
@@ -96,6 +98,7 @@ private:
 
       publisher_->publish(std::move(message));
     }
+    std::cout << "[CyclicNodeTimerCallback] " << this->get_name() << std::endl;
   }
 
 private:

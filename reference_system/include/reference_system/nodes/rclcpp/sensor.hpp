@@ -51,6 +51,8 @@ private:
     set_sample(this->get_name(), message.get());
 
     publisher_->publish(std::move(message));
+
+    std::cout << "[SensorNode] " << this->get_name() << std::endl;
   }
 
 private:

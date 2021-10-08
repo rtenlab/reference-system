@@ -177,6 +177,7 @@ int main(int argc, char * argv[])
 
   // Add nodes to executor
   executor.add_node(FrontLidarDriver); 
+  executor.add_node(PointsTransformerFront);
   /*
   executor.add_node(RearLidarDriver); executor.add_node(PointCloudMap); 
   executor.add_node(Visualizer); executor.add_node(Lanelet2Map); executor.add_node(PointsTransformerFront); 
@@ -191,6 +192,7 @@ int main(int argc, char * argv[])
   spinThread1.join();
   
   executor.remove_node(FrontLidarDriver); 
+  executor.remove_node(PointsTransformerFront); 
   
   /*
   executor.remove_node(RearLidarDriver); 
