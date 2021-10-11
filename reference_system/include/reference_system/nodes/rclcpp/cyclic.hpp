@@ -26,7 +26,6 @@
 
 #include <iostream>
 #include <fstream>
-#define LAT_DEBUG
 
 namespace nodes
 {

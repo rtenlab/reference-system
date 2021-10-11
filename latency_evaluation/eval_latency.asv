@@ -1,0 +1,63 @@
+%%
+clc; clear all; close all;
+e2eData = readtable("test2_default_e2e_latency.txt");
+e2eData_picas = readtable("test2_picas_e2e_latency.txt");
+
+e2eData = sortrows(e2eData, 4);
+e2eData_picas = sortrows(e2eData_picas, 4);
+
+e2e_lat = table2array(e2eData(:,2)) - table2array(e2eData(:,5));
+e2e_lat_picas = table2array(e2eData_picas(:,2)) - table2array(e2eData_picas(:,5));
+
+figure(1); hold on; grid on;
+plot(e2e_lat, 'b', 'LineWidth', 2);
+plot(e2e_lat_picas, 'r', 'LineWidth', 2);
+title('e2e latency, fusion buffer size: 1');
+ylabel('e2e latency [nsec]');
+xlabel('Sample #');
+
+set(gca, 'FontName', 'Times New Roman');
+set(gca, 'FontSize', 15);
+set(gca, 'Position', [0.04 0.15 0.93 0.7]);
+set(gcf, 'Units', 'Normalized', 'OuterPosition', [0, 0, 1, 0.65]);
+
+legend('Singlethreaded(Default)', 'PiCAS');
+
+%%
+clc; clear all; close all;
+
+e2eData = readtable("test2_default_latency.txt");
+e2eData_picas = readtable("test2_picas_latency.txt");
+
+e2eData = sortrows(e2eData, 4);
+e2eData_picas = sortrows(e2eData_picas, 4);
+
+behavior = e2eData(e2eData.Var1 == "BehaviorPlanner_subscription",:);
+behav_lat = table2array(behavior(:,2)) - table2array(behavior(:,5));
+
+behavior_picas = e2eData_picas(e2eData_picas.Var1 == "BehaviorPlanner_subscription",:);
+behav_lat_picas = table2array(behavior_picas(:,2)) - table2array(behavior_picas(:,5));
+
+collision = e2eData(e2eData.Var1 == "ObjectColli",:);
+coll_lat = table2array(behavior(:,2)) - table2array(behavior(:,5));
+
+behavior_picas = e2eData_picas(e2eData_picas.Var1 == "BehaviorPlanner_subscription",:);
+behav_lat_picas = table2array(behavior_picas(:,2)) - table2array(behavior_picas(:,5));
+
+
+figure(2); hold on; grid on;
+plot(behav_lat, 'b', 'LineWidth', 2);
+plot(behav_lat_picas, 'r', 'LineWidth', 2);
+title('Sensor to BehaviorPlanner latency, fusion buffer size: 1');
+ylabel('e2e latency [nsec]');
+xlabel('Sample #');
+
+set(gca, 'FontName', 'Times New Roman');
+set(gca, 'FontSize', 15);
+set(gca, 'Position', [0.04 0.15 0.93 0.7]);
+set(gcf, 'Units', 'Normalized', 'OuterPosition', [0, 0, 1, 0.65]);
+
+legend('Singlethreaded(Default)', 'PiCAS');
+
+
+
