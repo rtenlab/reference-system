@@ -41,13 +41,13 @@ public:
   {
 #ifdef LAT_DEBUG
     subscription_[0] = this->create_subscription<latency_t>(
-      settings.input_0, 1,
+      settings.input_0, 10,
       [this](const latency_t::SharedPtr msg) {input_callback(0U, msg);});
 
     subscription_[1] = this->create_subscription<latency_t>(
-      settings.input_1, 1,
+      settings.input_1, 10,
       [this](const latency_t::SharedPtr msg) {input_callback(1U, msg);});
-    publisher_ = this->create_publisher<latency_t>(settings.output_topic, 1);
+    publisher_ = this->create_publisher<latency_t>(settings.output_topic, 10);
 #else
     subscription_[0] = this->create_subscription<message_t>(
       settings.input_0, 10,
@@ -86,13 +86,14 @@ private:
     if (!message_cache_[0] || !message_cache_[1]) {
       if (str1.compare(str2) == 0) {
         miss_count_++;
-        
+        /*
         if (!message_cache_[0])
           std::cout << "[VehicleInterface] subscription topic 0 is empty." << std::endl;
         else if (!message_cache_[1])
           std::cout << "[VehicleInterface] subscription topic 1 is empty." << std::endl;
         
         std::cout << "[VehicleInterface] " << "input_topic number " << input_number << ", miss count is " << miss_count_ << std::endl;
+        */
       }
       return;
     }
@@ -124,9 +125,11 @@ private:
       }
     }
 
+    /*
     if (str1.compare(str2) == 0) {
       std::cout << "[VehicleInterface] Topic is published, sequency number is " << message.sequency << std::endl;
     }
+    */
 
     auto number_cruncher_result = number_cruncher(number_crunch_limit_);
     publisher_->publish(std::move(message));

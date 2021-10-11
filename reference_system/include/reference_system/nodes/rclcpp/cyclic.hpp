@@ -45,14 +45,14 @@ public:
     for (const auto & input_topic : settings.inputs) {
       subscriptions_.emplace_back(
         this->create_subscription<latency_t>(
-          input_topic, 1,
+          input_topic, 10,
           [this, input_number](const latency_t::SharedPtr msg) {
             input_callback(input_number, msg);
           }));
       ++input_number;
     }
     message_cache_.resize(subscriptions_.size());
-    publisher_ = this->create_publisher<latency_t>(settings.output_topic, 1);
+    publisher_ = this->create_publisher<latency_t>(settings.output_topic, 10);
     timer_ = this->create_wall_timer(
       settings.cycle_time,
       [this] {timer_callback();});
@@ -110,7 +110,7 @@ private:
     std::ofstream latency_debug;
     std::string home_dir = std::getenv("HOME");
     latency_debug.open(home_dir + "/Documents/latency.txt", std::ios::app);
-    latency_debug << this->get_name() << "_subscription" << "," << timestamp << "," << 
+    latency_debug << this->get_name() << "_subscription" << "_" << input_number << "," << timestamp << "," << 
     input_message->start_node_name << "," << input_message->sequency << "," << input_message->start_stamp << "\n";
     latency_debug.close();
   }

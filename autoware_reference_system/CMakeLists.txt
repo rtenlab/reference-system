@@ -59,11 +59,11 @@ ament_auto_add_executable(number_cruncher_benchmark
 )
 
 # Single Threaded Executor for PiCAS
-ament_auto_add_executable(autoware_default_singlethreaded_picas
-  src/ros2/executor/autoware_default_singlethreaded_picas.cpp
+ament_auto_add_executable(autoware_default_singlethreaded_picas_single_executor
+  src/ros2/executor/autoware_default_singlethreaded_picas_single_executor.cpp
 )
-ament_auto_add_executable(autoware_default_singlethreaded_picas_pri2
-  src/ros2/executor/autoware_default_singlethreaded_picas_pri2.cpp
+ament_auto_add_executable(autoware_default_singlethreaded_picas_multi_executors
+  src/ros2/executor/autoware_default_singlethreaded_picas_multi_executors.cpp
 )
 # Single Threaded Executor for node
 ament_auto_add_executable(autoware_default_singlethreaded_node
@@ -107,7 +107,7 @@ if(${BUILD_TESTING})
       autoware_default_singlethreaded
       autoware_default_staticsinglethreaded
       autoware_default_multithreaded
-      autoware_default_singlethreaded_picas
+      #autoware_default_singlethreaded_picas
       #autoware_default_custom
     )
 

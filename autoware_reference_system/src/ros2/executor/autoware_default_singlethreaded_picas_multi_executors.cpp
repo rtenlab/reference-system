@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "rclcpp/rclcpp.hpp"
+#include "rclcpp/rclcpp_rt.hpp"
 
 #include "reference_system/system/systems.hpp"
 
@@ -31,13 +31,27 @@ int main(int argc, char * argv[])
 
   //auto nodes = create_autoware_nodes<RclcppSystem, TimeConfig>();
 
-  rclcpp::executors::SingleThreadedExecutor executor;
+  rclcpp::executors::SingleThreadedExecutor executor1, executor2, executor3, executor4;
   
-  executor.enable_callback_priority();
-  RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "PiCAS priority-based callback scheduling: %s", executor.callback_priority_enabled ? "Enabled" : "Disabled");
+  executor1.enable_callback_priority();
+  RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "PiCAS priority-based callback scheduling: %s", executor1.callback_priority_enabled ? "Enabled" : "Disabled");
+  executor1.set_executor_priority_cpu(90, 0);
+  RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "PiCAS executor 1's rt-priority %d and CPU %d", executor1.executor_priority, executor1.executor_cpu);
 
-  executor.set_executor_priority_cpu(90, 0);
-  RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "PiCAS executor 1's rt-priority %d and CPU %d", executor.executor_priority, executor.executor_cpu);
+  executor2.enable_callback_priority();
+  RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "PiCAS priority-based callback scheduling: %s", executor2.callback_priority_enabled ? "Enabled" : "Disabled");
+  executor2.set_executor_priority_cpu(89, 0);
+  RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "PiCAS executor 2's rt-priority %d and CPU %d", executor2.executor_priority, executor2.executor_cpu);
+
+  executor3.enable_callback_priority();
+  RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "PiCAS priority-based callback scheduling: %s", executor3.callback_priority_enabled ? "Enabled" : "Disabled");
+  executor3.set_executor_priority_cpu(88, 0);
+  RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "PiCAS executor 3's rt-priority %d and CPU %d", executor3.executor_priority, executor3.executor_cpu);
+
+  executor4.enable_callback_priority();
+  RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "PiCAS priority-based callback scheduling: %s", executor4.callback_priority_enabled ? "Enabled" : "Disabled");
+  executor4.set_executor_priority_cpu(87, 0);
+  RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "PiCAS executor 4's rt-priority %d and CPU %d", executor4.executor_priority, executor4.executor_cpu);
 
   // Sensor nodes
   nodes::SensorSettings sensor;
@@ -183,75 +197,75 @@ int main(int argc, char * argv[])
   auto VehicleDBWSystem = std::make_shared<nodes::rclcpp_system::Command>(command);
 
   // Add nodes to executor
-  executor.add_node(FrontLidarDriver);
-  executor.add_node(RearLidarDriver);
-  executor.add_node(PointCloudMap);
-  executor.add_node(Visualizer);
-  executor.add_node(Lanelet2Map);
-  executor.add_node(PointsTransformerFront);
-  executor.add_node(PointsTransformerRear);
-  executor.add_node(PointCloudMapLoader);
-  executor.add_node(PointCloudFusion);
-  executor.add_node(VoxelGridDownsampler);
-  executor.add_node(RayGroundFilter);
-  executor.add_node(EuclideanClusterDetector);
-  executor.add_node(LanePlanner);
-  executor.add_node(ParkingPlanner);
-  executor.add_node(Lanelet2MapLoader);
-  executor.add_node(Lanelet2GlobalPlanner);
-  executor.add_node(NDTLocalizer);
-  executor.add_node(ObjectCollisionEstimator);
-  executor.add_node(BehaviorPlanner);
-  executor.add_node(MPCController);
-  executor.add_node(VehicleInterface);
-  executor.add_node(VehicleDBWSystem);
+  executor2.add_node(FrontLidarDriver);
+  executor2.add_node(RearLidarDriver);
+  executor3.add_node(PointCloudMap);
+  executor4.add_node(Visualizer);
+  executor4.add_node(Lanelet2Map);
+  executor2.add_node(PointsTransformerFront);
+  executor2.add_node(PointsTransformerRear);
+  executor3.add_node(PointCloudMapLoader);
+  executor2.add_node(PointCloudFusion);
+  executor3.add_node(VoxelGridDownsampler);
+  executor2.add_node(RayGroundFilter);
+  executor2.add_node(EuclideanClusterDetector);
+  executor4.add_node(LanePlanner);
+  executor4.add_node(ParkingPlanner);
+  executor4.add_node(Lanelet2MapLoader);
+  executor4.add_node(Lanelet2GlobalPlanner);
+  executor3.add_node(NDTLocalizer);
+  executor2.add_node(ObjectCollisionEstimator);
+  executor2.add_node(BehaviorPlanner);
+  executor1.add_node(MPCController);
+  executor1.add_node(VehicleInterface);
+  executor1.add_node(VehicleDBWSystem);
 
   // Assign priority
-  executor.set_callback_priority(FrontLidarDriver->get_callback(), 38);
-  executor.set_callback_priority(RearLidarDriver->get_callback(), 37);
-  executor.set_callback_priority(PointCloudMap->get_callback(), 31);
-  executor.set_callback_priority(Lanelet2Map->get_callback(), 22);
-  executor.set_callback_priority(Visualizer->get_callback(), 19);
+  executor2.set_callback_priority(FrontLidarDriver->get_callback(), 38);
+  executor2.set_callback_priority(RearLidarDriver->get_callback(), 37);
+  executor3.set_callback_priority(PointCloudMap->get_callback(), 31);
+  executor4.set_callback_priority(Lanelet2Map->get_callback(), 22);
+  executor4.set_callback_priority(Visualizer->get_callback(), 19);
   
-  executor.set_callback_priority(PointsTransformerRear->get_callback(), 39);
-  executor.set_callback_priority(PointsTransformerFront->get_callback(), 40);
+  executor2.set_callback_priority(PointsTransformerRear->get_callback(), 39);
+  executor2.set_callback_priority(PointsTransformerFront->get_callback(), 40);
   
-  executor.set_callback_priority(PointCloudFusion->get_subcallback_one(), 42);
-  executor.set_callback_priority(PointCloudFusion->get_subcallback_two(), 41);
+  executor2.set_callback_priority(PointCloudFusion->get_subcallback_one(), 42);
+  executor2.set_callback_priority(PointCloudFusion->get_subcallback_two(), 41);
 
-  executor.set_callback_priority(PointCloudMapLoader->get_callback(), 32);
-  executor.set_callback_priority(VoxelGridDownsampler->get_callback(), 33);
-  executor.set_callback_priority(RayGroundFilter->get_callback(), 43);
+  executor3.set_callback_priority(PointCloudMapLoader->get_callback(), 32);
+  executor3.set_callback_priority(VoxelGridDownsampler->get_callback(), 33);
+  executor2.set_callback_priority(RayGroundFilter->get_callback(), 43);
 
-  executor.set_callback_priority(NDTLocalizer->get_subcallback_one(), 35);
-  executor.set_callback_priority(NDTLocalizer->get_subcallback_two(), 34);
+  executor3.set_callback_priority(NDTLocalizer->get_subcallback_one(), 35);
+  executor3.set_callback_priority(NDTLocalizer->get_subcallback_two(), 34);
 
-  executor.set_callback_priority(EuclideanClusterDetector->get_callback(), 44);
+  executor2.set_callback_priority(EuclideanClusterDetector->get_callback(), 44);
 
-  executor.set_callback_priority(Lanelet2GlobalPlanner->get_subcallback_one(), 20);
-  executor.set_callback_priority(Lanelet2GlobalPlanner->get_subcallback_two(), 21);
+  executor4.set_callback_priority(Lanelet2GlobalPlanner->get_subcallback_one(), 20);
+  executor4.set_callback_priority(Lanelet2GlobalPlanner->get_subcallback_two(), 21);
   
-  executor.set_callback_priority(Lanelet2MapLoader->get_subcallback_one(), 24);
-  executor.set_callback_priority(Lanelet2MapLoader->get_subcallback_two(), 23);
+  executor4.set_callback_priority(Lanelet2MapLoader->get_subcallback_one(), 24);
+  executor4.set_callback_priority(Lanelet2MapLoader->get_subcallback_two(), 23);
 
-  executor.set_callback_priority(ParkingPlanner->get_callback(), 25);
-  executor.set_callback_priority(LanePlanner->get_callback(), 26);
-  executor.set_callback_priority(ObjectCollisionEstimator->get_callback(), 45);
+  executor4.set_callback_priority(ParkingPlanner->get_callback(), 25);
+  executor4.set_callback_priority(LanePlanner->get_callback(), 26);
+  executor2.set_callback_priority(ObjectCollisionEstimator->get_callback(), 45);
 
-  executor.set_callback_priority(BehaviorPlanner->get_subcallback_one(), 46);
-  executor.set_callback_priority(BehaviorPlanner->get_subcallback_two(), 36);
-  executor.set_callback_priority(BehaviorPlanner->get_subcallback_three(), 27);
-  executor.set_callback_priority(BehaviorPlanner->get_subcallback_four(), 29);
-  executor.set_callback_priority(BehaviorPlanner->get_subcallback_five(), 28);
-  executor.set_callback_priority(BehaviorPlanner->get_subcallback_six(), 30);
-  executor.set_callback_priority(BehaviorPlanner->get_callback(), 47);
+  executor2.set_callback_priority(BehaviorPlanner->get_subcallback_one(), 46);
+  executor2.set_callback_priority(BehaviorPlanner->get_subcallback_two(), 36);
+  executor2.set_callback_priority(BehaviorPlanner->get_subcallback_three(), 27);
+  executor2.set_callback_priority(BehaviorPlanner->get_subcallback_four(), 29);
+  executor2.set_callback_priority(BehaviorPlanner->get_subcallback_five(), 28);
+  executor2.set_callback_priority(BehaviorPlanner->get_subcallback_six(), 30);
+  executor2.set_callback_priority(BehaviorPlanner->get_callback(), 47);
 
-  executor.set_callback_priority(MPCController->get_callback(), 48);
+  executor1.set_callback_priority(MPCController->get_callback(), 48);
   
-  executor.set_callback_priority(VehicleInterface->get_subcallback_one(), 50);
-  executor.set_callback_priority(VehicleInterface->get_subcallback_two(), 49);
+  executor1.set_callback_priority(VehicleInterface->get_subcallback_one(), 50);
+  executor1.set_callback_priority(VehicleInterface->get_subcallback_two(), 49);
 
-  executor.set_callback_priority(VehicleDBWSystem->get_callback(), 51);
+  executor1.set_callback_priority(VehicleDBWSystem->get_callback(), 51);
   
   RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "FrontLidarDriver->priority: %d", FrontLidarDriver->get_callback()->callback_priority);
   RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "RearLidarDriver->priority: %d", RearLidarDriver->get_callback()->callback_priority);
@@ -299,32 +313,37 @@ int main(int argc, char * argv[])
   
   RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "VehicleDBWSystem->priority: %d", VehicleDBWSystem->get_callback()->callback_priority);
   
-  std::thread spinThread1(&rclcpp::executors::SingleThreadedExecutor::spin_rt, &executor);
+  std::thread spinThread1(&rclcpp::executors::SingleThreadedExecutor::spin_rt, &executor1);
+  std::thread spinThread2(&rclcpp::executors::SingleThreadedExecutor::spin_rt, &executor2);
+  std::thread spinThread3(&rclcpp::executors::SingleThreadedExecutor::spin_rt, &executor3);
+  std::thread spinThread4(&rclcpp::executors::SingleThreadedExecutor::spin_rt, &executor4);
+
 
   spinThread1.join();
   
-  executor.remove_node(FrontLidarDriver);
-  executor.remove_node(RearLidarDriver);
-  executor.remove_node(PointCloudMap);
-  executor.remove_node(Visualizer);
-  executor.remove_node(Lanelet2Map);
-  executor.remove_node(PointsTransformerFront);
-  executor.remove_node(PointsTransformerRear);
-  executor.remove_node(PointCloudMapLoader);
-  executor.remove_node(PointCloudFusion);
-  executor.remove_node(VoxelGridDownsampler);
-  executor.remove_node(RayGroundFilter);
-  executor.remove_node(EuclideanClusterDetector);
-  executor.remove_node(LanePlanner);
-  executor.remove_node(ParkingPlanner);
-  executor.remove_node(Lanelet2MapLoader);
-  executor.remove_node(Lanelet2GlobalPlanner);
-  executor.remove_node(NDTLocalizer);
-  executor.remove_node(ObjectCollisionEstimator);
-  executor.remove_node(BehaviorPlanner);
-  executor.remove_node(MPCController);
-  executor.remove_node(VehicleInterface);
-  executor.remove_node(VehicleDBWSystem);
+  executor2.remove_node(FrontLidarDriver);
+  executor2.remove_node(RearLidarDriver);
+  executor3.remove_node(PointCloudMap);
+  executor4.remove_node(Visualizer);
+  executor4.remove_node(Lanelet2Map);
+  executor2.remove_node(PointsTransformerFront);
+  executor2.remove_node(PointsTransformerRear);
+  executor3.remove_node(PointCloudMapLoader);
+  executor2.remove_node(PointCloudFusion);
+  executor3.remove_node(VoxelGridDownsampler);
+  executor2.remove_node(RayGroundFilter);
+  executor2.remove_node(EuclideanClusterDetector);
+  executor4.remove_node(LanePlanner);
+  executor4.remove_node(ParkingPlanner);
+  executor4.remove_node(Lanelet2MapLoader);
+  executor4.remove_node(Lanelet2GlobalPlanner);
+  executor3.remove_node(NDTLocalizer);
+  executor2.remove_node(ObjectCollisionEstimator);
+  executor2.remove_node(BehaviorPlanner);
+  executor1.remove_node(MPCController);
+  executor1.remove_node(VehicleInterface);
+  executor1.remove_node(VehicleDBWSystem);
+
   
   rclcpp::shutdown();
 

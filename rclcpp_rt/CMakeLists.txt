@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.5)
 
-project(rclcpp)
+project(rclcpp_rt)
 
 find_package(Threads REQUIRED)
 
