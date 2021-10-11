@@ -38,7 +38,7 @@ public:
   : Node(settings.node_name), sequency_(0)
   {
 #ifdef LAT_DEBUG
-    publisher_ = this->create_publisher<latency_t>(settings.topic_name, 10);
+    publisher_ = this->create_publisher<latency_t>(settings.topic_name, BUFFER_SIZE);
     timer_ = this->create_wall_timer(
       settings.cycle_time,
       [this] {timer_callback_latency();});

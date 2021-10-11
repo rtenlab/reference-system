@@ -41,13 +41,13 @@ public:
   {
 #ifdef LAT_DEBUG
     subscription_[0] = this->create_subscription<latency_t>(
-      settings.input_0, 10,
+      settings.input_0, BUFFER_SIZE,
       [this](const latency_t::SharedPtr msg) {input_callback(0U, msg);});
 
     subscription_[1] = this->create_subscription<latency_t>(
-      settings.input_1, 10,
+      settings.input_1, BUFFER_SIZE,
       [this](const latency_t::SharedPtr msg) {input_callback(1U, msg);});
-    publisher_ = this->create_publisher<latency_t>(settings.output_topic, 10);
+    publisher_ = this->create_publisher<latency_t>(settings.output_topic, 1);
 #else
     subscription_[0] = this->create_subscription<message_t>(
       settings.input_0, 10,

@@ -18,6 +18,8 @@
 #include <string>
 #include <vector>
 
+#define BUFFER_SIZE 10
+
 namespace nodes
 {
 

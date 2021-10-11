@@ -45,14 +45,14 @@ public:
     for (const auto & input_topic : settings.inputs) {
       subscriptions_.emplace_back(
         this->create_subscription<latency_t>(
-          input_topic, 10,
+          input_topic, BUFFER_SIZE,
           [this, input_number](const latency_t::SharedPtr msg) {
             input_callback(input_number, msg);
           }));
       ++input_number;
     }
     message_cache_.resize(subscriptions_.size());
-    publisher_ = this->create_publisher<latency_t>(settings.output_topic, 10);
+    publisher_ = this->create_publisher<latency_t>(settings.output_topic, BUFFER_SIZE);
     timer_ = this->create_wall_timer(
       settings.cycle_time,
       [this] {timer_callback();});
