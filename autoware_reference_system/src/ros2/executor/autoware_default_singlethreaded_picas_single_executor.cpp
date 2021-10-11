@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "rclcpp/rclcpp.hpp"
+#include "rclcpp/rclcpp_rt.hpp"
 
 #include "reference_system/system/systems.hpp"
 
@@ -36,7 +36,7 @@ int main(int argc, char * argv[])
   executor.enable_callback_priority();
   RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "PiCAS priority-based callback scheduling: %s", executor.callback_priority_enabled ? "Enabled" : "Disabled");
 
-  executor.set_executor_priority_cpu(90, 5);
+  executor.set_executor_priority_cpu(90, 0);
   RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "PiCAS executor 1's rt-priority %d and CPU %d", executor.executor_priority, executor.executor_cpu);
 
   // Sensor nodes
@@ -206,88 +206,100 @@ int main(int argc, char * argv[])
   executor.add_node(VehicleInterface);
   executor.add_node(VehicleDBWSystem);
 
-  // Assign priority
-  executor.set_callback_priority(FrontLidarDriver->get_callback(), 1);
-  executor.set_callback_priority(RearLidarDriver->get_callback(), 2);
-  executor.set_callback_priority(PointCloudMap->get_callback(), 3);
-
-  executor.set_callback_priority(Visualizer->get_callback(), 4);
-  executor.set_callback_priority(Lanelet2Map->get_callback(), 5);
-
-  executor.set_callback_priority(PointsTransformerFront->get_callback(), 6);
-  executor.set_callback_priority(PointsTransformerRear->get_callback(), 7);
-  executor.set_callback_priority(PointCloudMapLoader->get_callback(), 8);
+ // Assign priority
+  executor.set_callback_priority(FrontLidarDriver->get_callback(), 38);
+  executor.set_callback_priority(RearLidarDriver->get_callback(), 37);
+  executor.set_callback_priority(PointCloudMap->get_callback(), 31);
+  executor.set_callback_priority(Lanelet2Map->get_callback(), 22);
+  executor.set_callback_priority(Visualizer->get_callback(), 19);
   
-  // Multiple callbacks for fusion node  
-  executor.set_callback_priority(PointCloudFusion->get_callback_first(), 10);
-  executor.set_callback_priority(PointCloudFusion->get_callback_second(), 7);
-
-  executor.set_callback_priority(VoxelGridDownsampler->get_callback(), 11);
-
-  executor.set_callback_priority(RayGroundFilter->get_callback(), 12);
-  executor.set_callback_priority(EuclideanClusterDetector->get_callback(), 13);
-  executor.set_callback_priority(LanePlanner->get_callback(), 14);
-  executor.set_callback_priority(ParkingPlanner->get_callback(), 15);
-
-  // Multiple callbacks for fusion node  
-  executor.set_callback_priority(Lanelet2MapLoader->get_callback_first(), 16);
-  executor.set_callback_priority(Lanelet2MapLoader->get_callback_second(), 17);
-  // Multiple callbacks for fusion node  
-  executor.set_callback_priority(Lanelet2GlobalPlanner->get_callback_first(), 18);
-  executor.set_callback_priority(Lanelet2GlobalPlanner->get_callback_second(), 19);
-  // Multiple callbacks for fusion node  
-  executor.set_callback_priority(NDTLocalizer->get_callback_first(), 21);
-  executor.set_callback_priority(NDTLocalizer->get_callback_second(), 20);
+  executor.set_callback_priority(PointsTransformerRear->get_callback(), 39);
+  executor.set_callback_priority(PointsTransformerFront->get_callback(), 40);
   
-  executor.set_callback_priority(ObjectCollisionEstimator->get_callback(), 22);
-  executor.set_callback_priority(BehaviorPlanner->get_callback(), 23);
-  executor.set_callback_priority(MPCController->get_callback(), 24);
+  executor.set_callback_priority(PointCloudFusion->get_subcallback_one(), 42);
+  executor.set_callback_priority(PointCloudFusion->get_subcallback_two(), 41);
 
-  // Multiple callbacks for fusion node  
-  executor.set_callback_priority(VehicleInterface->get_callback_first(), 25);
-  executor.set_callback_priority(VehicleInterface->get_callback_second(), 26);
+  executor.set_callback_priority(PointCloudMapLoader->get_callback(), 32);
+  executor.set_callback_priority(VoxelGridDownsampler->get_callback(), 33);
+  executor.set_callback_priority(RayGroundFilter->get_callback(), 43);
 
-  executor.set_callback_priority(VehicleDBWSystem->get_callback(), 27);
+  executor.set_callback_priority(NDTLocalizer->get_subcallback_one(), 35);
+  executor.set_callback_priority(NDTLocalizer->get_subcallback_two(), 34);
+
+  executor.set_callback_priority(EuclideanClusterDetector->get_callback(), 44);
+
+  executor.set_callback_priority(Lanelet2GlobalPlanner->get_subcallback_one(), 20);
+  executor.set_callback_priority(Lanelet2GlobalPlanner->get_subcallback_two(), 21);
+  
+  executor.set_callback_priority(Lanelet2MapLoader->get_subcallback_one(), 24);
+  executor.set_callback_priority(Lanelet2MapLoader->get_subcallback_two(), 23);
+
+  executor.set_callback_priority(ParkingPlanner->get_callback(), 25);
+  executor.set_callback_priority(LanePlanner->get_callback(), 26);
+  executor.set_callback_priority(ObjectCollisionEstimator->get_callback(), 45);
+
+  executor.set_callback_priority(BehaviorPlanner->get_subcallback_one(), 46);
+  executor.set_callback_priority(BehaviorPlanner->get_subcallback_two(), 36);
+  executor.set_callback_priority(BehaviorPlanner->get_subcallback_three(), 27);
+  executor.set_callback_priority(BehaviorPlanner->get_subcallback_four(), 29);
+  executor.set_callback_priority(BehaviorPlanner->get_subcallback_five(), 28);
+  executor.set_callback_priority(BehaviorPlanner->get_subcallback_six(), 30);
+  executor.set_callback_priority(BehaviorPlanner->get_callback(), 47);
+
+  executor.set_callback_priority(MPCController->get_callback(), 48);
+  
+  executor.set_callback_priority(VehicleInterface->get_subcallback_one(), 50);
+  executor.set_callback_priority(VehicleInterface->get_subcallback_two(), 49);
+
+  executor.set_callback_priority(VehicleDBWSystem->get_callback(), 51);  
 
   RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "FrontLidarDriver->priority: %d", FrontLidarDriver->get_callback()->callback_priority);
   RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "RearLidarDriver->priority: %d", RearLidarDriver->get_callback()->callback_priority);
   RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "PointCloudMap->priority: %d", PointCloudMap->get_callback()->callback_priority);
-  RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "Visualizer->priority: %d", Visualizer->get_callback()->callback_priority);
   RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "Lanelet2Map->priority: %d", Lanelet2Map->get_callback()->callback_priority);
-
-  RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "PointsTransformerFront->priority: %d", PointsTransformerFront->get_callback()->callback_priority);
-  RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "PointsTransformerRear->priority: %d", PointsTransformerRear->get_callback()->callback_priority);
-  RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "PointCloudMapLoader->priority: %d", PointCloudMapLoader->get_callback()->callback_priority);
-
-  RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "PointCloudFusion_fisrt->priority: %d", PointCloudFusion->get_callback_first()->callback_priority);
-  RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "PointCloudFusion_second->priority: %d", PointCloudFusion->get_callback_second()->callback_priority);
+  RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "Visualizer->priority: %d", Visualizer->get_callback()->callback_priority);
   
+  RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "PointsTransformerRear->priority: %d", PointsTransformerRear->get_callback()->callback_priority);
+  RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "PointsTransformerFront->priority: %d", PointsTransformerFront->get_callback()->callback_priority);
+  
+  RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "PointCloudFusion_one->priority: %d", PointCloudFusion->get_subcallback_one()->callback_priority);
+  RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "PointCloudFusion_two->priority: %d", PointCloudFusion->get_subcallback_two()->callback_priority);
+  
+  RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "PointCloudMapLoader->priority: %d", PointCloudMapLoader->get_callback()->callback_priority);
   RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "VoxelGridDownsampler->priority: %d", VoxelGridDownsampler->get_callback()->callback_priority);
   RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "RayGroundFilter->priority: %d", RayGroundFilter->get_callback()->callback_priority);
+
+  RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "NDTLocalizer_one->priority: %d", NDTLocalizer->get_subcallback_one()->callback_priority);
+  RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "NDTLocalizer_two->priority: %d", NDTLocalizer->get_subcallback_two()->callback_priority);
+
   RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "EuclideanClusterDetector->priority: %d", EuclideanClusterDetector->get_callback()->callback_priority);
-  RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "LanePlanner->priority: %d", LanePlanner->get_callback()->callback_priority);
+
+  RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "Lanelet2GlobalPlanner_one->priority: %d", Lanelet2GlobalPlanner->get_subcallback_one()->callback_priority);
+  RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "Lanelet2GlobalPlanner_two->priority: %d", Lanelet2GlobalPlanner->get_subcallback_two()->callback_priority);
+
+  RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "Lanelet2MapLoader_one->priority: %d", Lanelet2MapLoader->get_subcallback_one()->callback_priority);
+  RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "Lanelet2MapLoader_two->priority: %d", Lanelet2MapLoader->get_subcallback_two()->callback_priority);
+
   RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "ParkingPlanner->priority: %d", ParkingPlanner->get_callback()->callback_priority);
-
-  RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "Lanelet2MapLoader_first->priority: %d", Lanelet2MapLoader->get_callback_first()->callback_priority);
-  RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "Lanelet2MapLoader_second->priority: %d", Lanelet2MapLoader->get_callback_second()->callback_priority);
-
-  RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "Lanelet2GlobalPlanner_first->priority: %d", Lanelet2GlobalPlanner->get_callback_first()->callback_priority);
-  RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "Lanelet2GlobalPlanner_second->priority: %d", Lanelet2GlobalPlanner->get_callback_second()->callback_priority);
-
-  RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "NDTLocalizer_first->priority: %d", NDTLocalizer->get_callback_first()->callback_priority);
-  RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "NDTLocalizer_second->priority: %d", NDTLocalizer->get_callback_second()->callback_priority);
-
+  RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "LanePlanner->priority: %d", LanePlanner->get_callback()->callback_priority);
   RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "ObjectCollisionEstimator->priority: %d", ObjectCollisionEstimator->get_callback()->callback_priority);
+
+  RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "BehaviorPlanner_one->priority: %d", BehaviorPlanner->get_subcallback_one()->callback_priority);
+  RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "BehaviorPlanner_two->priority: %d", BehaviorPlanner->get_subcallback_two()->callback_priority);
+  RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "BehaviorPlanner_three->priority: %d", BehaviorPlanner->get_subcallback_three()->callback_priority);
+  RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "BehaviorPlanner_four->priority: %d", BehaviorPlanner->get_subcallback_four()->callback_priority);
+  RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "BehaviorPlanner_five->priority: %d", BehaviorPlanner->get_subcallback_five()->callback_priority);
+  RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "BehaviorPlanner_six->priority: %d", BehaviorPlanner->get_subcallback_six()->callback_priority);
   RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "BehaviorPlanner->priority: %d", BehaviorPlanner->get_callback()->callback_priority);
+
   RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "MPCController->priority: %d", MPCController->get_callback()->callback_priority);
   
-  RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "VehicleInterface_first->priority: %d", VehicleInterface->get_callback_first()->callback_priority);
-  RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "VehicleInterface_second->priority: %d", VehicleInterface->get_callback_second()->callback_priority);
+  RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "VehicleInterface_one->priority: %d", VehicleInterface->get_subcallback_one()->callback_priority);
+  RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "VehicleInterface_two->priority: %d", VehicleInterface->get_subcallback_two()->callback_priority);
   
   RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "VehicleDBWSystem->priority: %d", VehicleDBWSystem->get_callback()->callback_priority);
   
   std::thread spinThread1(&rclcpp::executors::SingleThreadedExecutor::spin_rt, &executor);
-  //std::thread spinThread1(&rclcpp::executors::SingleThreadedExecutor::spin, &executor);
 
   spinThread1.join();
   
@@ -313,39 +325,6 @@ int main(int argc, char * argv[])
   executor.remove_node(MPCController);
   executor.remove_node(VehicleInterface);
   executor.remove_node(VehicleDBWSystem);
-
-  //std::cout << FrontLidarDriver->get_name() << std::endl;
-
-  //std::cout << typeid(nodes).name() << std::endl;
-  /*  
-  for (auto & node : nodes) {
-    //executor.add_node(node);
-    std::string node_name = node->get_name();
-    
-    //std::cout << typeid(node).name() << std::endl;
-
-    if (node_name == "FrontLidarDriver") {
-      std::cout << node_name << std::endl;
-      executor.set_callback_priority(node->timer_, 10);
-      //rclcpp::node_interfaces::NodeTimersInterface::SharedPtr tinterf = node->get_node_timers_interface();
-      for (auto & weak_group : node->get_callback_groups()) {
-        auto group = weak_group.lock();
-        //std::cout << typeid(group).name() << std::endl;
-        //for (auto & weak_timer : group->timer_ptrs_) {
-        //  auto timer = weak_timer.lock();
-        //}
-      }
-      
-      
-      //executor.set_callback_priority(tinterf, 10);
-      //RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "Timer_callback->priority: %d", node->timer_->callback_priority);
-    }
-    
-  }
-  */
-  //executor.spin();
-
-  //nodes.clear();
   
   rclcpp::shutdown();
 

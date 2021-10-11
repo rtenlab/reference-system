@@ -18,6 +18,9 @@
 #include <string>
 #include <vector>
 
+#define BUFFER_SIZE 10
+#define LAT_DEBUG
+
 namespace nodes
 {
 

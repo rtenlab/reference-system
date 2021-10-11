@@ -15,7 +15,10 @@
 #define REFERENCE_SYSTEM__MSG_TYPES_HPP_
 
 #include "reference_interfaces/msg/message4kb.hpp"
+#include "reference_interfaces/msg/latency_stamp.hpp"
 
 using message_t = reference_interfaces::msg::Message4kb;
+// To evaluate latency
+using latency_t= reference_interfaces::msg::LatencyStamp;
 
 #endif  // REFERENCE_SYSTEM__MSG_TYPES_HPP_

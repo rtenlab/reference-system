@@ -17,12 +17,15 @@ ament_auto_find_build_dependencies()
 set(msg_files
   "msg/TransmissionStats.idl"
   "msg/Message4kb.idl"
+  "msg/LatencyStamp.idl"
 )
 
 # add additional message dependencies here
 #set(msg_dependencies
 #  "std_msgs"
 #)
+
+find_package(rosidl_default_generators REQUIRED)
 
 rosidl_generate_interfaces(${PROJECT_NAME}
   ${msg_files}
