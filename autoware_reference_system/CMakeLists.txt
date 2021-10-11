@@ -37,20 +37,21 @@ endif()
 find_package(ament_cmake_auto REQUIRED)
 ament_auto_find_build_dependencies()
 
+
 # Single Threaded Executor
 ament_auto_add_executable(autoware_default_singlethreaded
   src/ros2/executor/autoware_default_singlethreaded.cpp
 )
 
 # Static Single Threaded Executor
-ament_auto_add_executable(autoware_default_staticsinglethreaded
-  src/ros2/executor/autoware_default_staticsinglethreaded.cpp
-)
+#ament_auto_add_executable(autoware_default_staticsinglethreaded
+#  src/ros2/executor/autoware_default_staticsinglethreaded.cpp
+#)
 
 # Multi Threaded Executor
-ament_auto_add_executable(autoware_default_multithreaded
-  src/ros2/executor/autoware_default_multithreaded.cpp
-)
+#ament_auto_add_executable(autoware_default_multithreaded
+#  src/ros2/executor/autoware_default_multithreaded.cpp
+#)
 
 # Number Cruncher Benchmark
 ament_auto_add_executable(number_cruncher_benchmark
@@ -61,11 +62,18 @@ ament_auto_add_executable(number_cruncher_benchmark
 ament_auto_add_executable(autoware_default_singlethreaded_picas
   src/ros2/executor/autoware_default_singlethreaded_picas.cpp
 )
-
+ament_auto_add_executable(autoware_default_singlethreaded_picas_pri2
+  src/ros2/executor/autoware_default_singlethreaded_picas_pri2.cpp
+)
 # Single Threaded Executor for node
 ament_auto_add_executable(autoware_default_singlethreaded_node
   src/ros2/executor/autoware_default_singlethreaded_node.cpp
 )
+
+ament_auto_add_executable(autoware_default_singlethreaded_default
+  src/ros2/executor/autoware_default_singlethreaded_default.cpp
+)
+
 
 # Add new executors to test here
 #ament_auto_add_executable(autoware_default_custom

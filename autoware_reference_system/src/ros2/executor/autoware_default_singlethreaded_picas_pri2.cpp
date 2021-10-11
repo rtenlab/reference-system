@@ -207,51 +207,51 @@ int main(int argc, char * argv[])
   executor.add_node(VehicleDBWSystem);
 
   // Assign priority
-  executor.set_callback_priority(FrontLidarDriver->get_callback(), 5);
-  executor.set_callback_priority(RearLidarDriver->get_callback(), 4);
-  executor.set_callback_priority(PointCloudMap->get_callback(), 3);
-  executor.set_callback_priority(Lanelet2Map->get_callback(), 2);
-  executor.set_callback_priority(Visualizer->get_callback(), 1);
+  executor.set_callback_priority(FrontLidarDriver->get_callback(), 38);
+  executor.set_callback_priority(RearLidarDriver->get_callback(), 37);
+  executor.set_callback_priority(PointCloudMap->get_callback(), 31);
+  executor.set_callback_priority(Lanelet2Map->get_callback(), 22);
+  executor.set_callback_priority(Visualizer->get_callback(), 19);
   
-  executor.set_callback_priority(PointsTransformerRear->get_callback(), 6);
-  executor.set_callback_priority(PointsTransformerFront->get_callback(), 7);
+  executor.set_callback_priority(PointsTransformerRear->get_callback(), 39);
+  executor.set_callback_priority(PointsTransformerFront->get_callback(), 40);
   
-  executor.set_callback_priority(PointCloudFusion->get_subcallback_one(), 9);
-  executor.set_callback_priority(PointCloudFusion->get_subcallback_two(), 8);
+  executor.set_callback_priority(PointCloudFusion->get_subcallback_one(), 42);
+  executor.set_callback_priority(PointCloudFusion->get_subcallback_two(), 41);
 
-  executor.set_callback_priority(PointCloudMapLoader->get_callback(), 10);
-  executor.set_callback_priority(VoxelGridDownsampler->get_callback(), 11);
-  executor.set_callback_priority(RayGroundFilter->get_callback(), 12);
+  executor.set_callback_priority(PointCloudMapLoader->get_callback(), 32);
+  executor.set_callback_priority(VoxelGridDownsampler->get_callback(), 33);
+  executor.set_callback_priority(RayGroundFilter->get_callback(), 43);
 
-  executor.set_callback_priority(NDTLocalizer->get_subcallback_one(), 14);
-  executor.set_callback_priority(NDTLocalizer->get_subcallback_two(), 13);
+  executor.set_callback_priority(NDTLocalizer->get_subcallback_one(), 35);
+  executor.set_callback_priority(NDTLocalizer->get_subcallback_two(), 34);
 
-  executor.set_callback_priority(EuclideanClusterDetector->get_callback(), 15);
+  executor.set_callback_priority(EuclideanClusterDetector->get_callback(), 44);
 
-  executor.set_callback_priority(Lanelet2GlobalPlanner->get_subcallback_one(), 16);
-  executor.set_callback_priority(Lanelet2GlobalPlanner->get_subcallback_two(), 17);
+  executor.set_callback_priority(Lanelet2GlobalPlanner->get_subcallback_one(), 20);
+  executor.set_callback_priority(Lanelet2GlobalPlanner->get_subcallback_two(), 21);
   
-  executor.set_callback_priority(Lanelet2MapLoader->get_subcallback_one(), 19);
-  executor.set_callback_priority(Lanelet2MapLoader->get_subcallback_two(), 18);
+  executor.set_callback_priority(Lanelet2MapLoader->get_subcallback_one(), 24);
+  executor.set_callback_priority(Lanelet2MapLoader->get_subcallback_two(), 23);
 
-  executor.set_callback_priority(ParkingPlanner->get_callback(), 20);
-  executor.set_callback_priority(LanePlanner->get_callback(), 21);
-  executor.set_callback_priority(ObjectCollisionEstimator->get_callback(), 22);
+  executor.set_callback_priority(ParkingPlanner->get_callback(), 25);
+  executor.set_callback_priority(LanePlanner->get_callback(), 26);
+  executor.set_callback_priority(ObjectCollisionEstimator->get_callback(), 45);
 
-  executor.set_callback_priority(BehaviorPlanner->get_subcallback_one(), 28);
-  executor.set_callback_priority(BehaviorPlanner->get_subcallback_two(), 27);
-  executor.set_callback_priority(BehaviorPlanner->get_subcallback_three(), 23);
-  executor.set_callback_priority(BehaviorPlanner->get_subcallback_four(), 25);
-  executor.set_callback_priority(BehaviorPlanner->get_subcallback_five(), 24);
-  executor.set_callback_priority(BehaviorPlanner->get_subcallback_six(), 26);
-  executor.set_callback_priority(BehaviorPlanner->get_callback(), 29);
+  executor.set_callback_priority(BehaviorPlanner->get_subcallback_one(), 46);
+  executor.set_callback_priority(BehaviorPlanner->get_subcallback_two(), 36);
+  executor.set_callback_priority(BehaviorPlanner->get_subcallback_three(), 27);
+  executor.set_callback_priority(BehaviorPlanner->get_subcallback_four(), 29);
+  executor.set_callback_priority(BehaviorPlanner->get_subcallback_five(), 28);
+  executor.set_callback_priority(BehaviorPlanner->get_subcallback_six(), 30);
+  executor.set_callback_priority(BehaviorPlanner->get_callback(), 47);
 
-  executor.set_callback_priority(MPCController->get_callback(), 32);
+  executor.set_callback_priority(MPCController->get_callback(), 48);
   
-  executor.set_callback_priority(VehicleInterface->get_subcallback_one(), 31);
-  executor.set_callback_priority(VehicleInterface->get_subcallback_two(), 30);
+  executor.set_callback_priority(VehicleInterface->get_subcallback_one(), 50);
+  executor.set_callback_priority(VehicleInterface->get_subcallback_two(), 49);
 
-  executor.set_callback_priority(VehicleDBWSystem->get_callback(), 33);
+  executor.set_callback_priority(VehicleDBWSystem->get_callback(), 51);
   
   RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "FrontLidarDriver->priority: %d", FrontLidarDriver->get_callback()->callback_priority);
   RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "RearLidarDriver->priority: %d", RearLidarDriver->get_callback()->callback_priority);

@@ -1,0 +1,26 @@
+module reference_interfaces {
+  module msg {
+    //module LatencyStamp_Constants {
+    //  const uint64 DESTINATION_LENGTH = 5;
+    //};
+    struct LatencyStamp {
+      uint64 sequency;
+      uint64 start_stamp;
+      uint64 cyclic_start;
+      string start_node_name;
+      /*
+      uint64 dest1_stamp;
+      uint64 dest2_stamp;
+      uint64 dest3_stamp;
+      uint64 dest4_stamp;
+      uint64 dest5_stamp;
+      char start_node_name[56];
+      char dest1_node_name[56];
+      char dest2_node_name[56];
+      char dest3_node_name[56];
+      char dest4_node_name[56];
+      char dest5_node_name[56];
+      */
+    };
+  };
+};
