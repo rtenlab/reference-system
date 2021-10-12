@@ -44,8 +44,9 @@ class ServiceBase
 public:
   RCLCPP_SMART_PTR_DEFINITIONS_NOT_COPYABLE(ServiceBase)
 
-  // PiCAS 
+#ifdef PICAS
   int callback_priority = 0;
+#endif
 
   RCLCPP_PUBLIC
   explicit ServiceBase(std::shared_ptr<rcl_node_t> node_handle);

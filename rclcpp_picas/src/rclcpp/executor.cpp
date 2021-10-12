@@ -33,11 +33,12 @@
 #include "rclcpp/node_interfaces/node_base.hpp"
 
 #include "rcutils/logging_macros.h"
-// PiCAS 
+
+#ifdef PICAS
 #include <rclcpp/cb_sched.hpp>
 #include "rclcpp/memory_strategy.hpp"
 using rclcpp::memory_strategy::MemoryStrategy;
-
+#endif
 
 using namespace std::chrono_literals;
 
@@ -518,37 +519,37 @@ void
 Executor::execute_any_executable(AnyExecutable & any_exec)
 {
   if (!spinning.load()) {
-#ifdef HJ_DEBUG
+#ifdef PICAS_DEBUG
     RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "execute callback, but there isn't a spinning load.");    
 #endif
     return;
   }
   if (any_exec.timer) {
-#ifdef HJ_DEBUG
+#ifdef PICAS_DEBUG
     RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "execute callback [timer callback].");    
 #endif
     execute_timer(any_exec.timer);
   }
   if (any_exec.subscription) {
-#ifdef HJ_DEBUG
+#ifdef PICAS_DEBUG
     RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "execute callback [subscription callback].");    
 #endif
     execute_subscription(any_exec.subscription);
   }
   if (any_exec.service) {
-#ifdef HJ_DEBUG
+#ifdef PICAS_DEBUG
     RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "execute callback [service callback].");    
 #endif
     execute_service(any_exec.service);
   }
   if (any_exec.client) {
-#ifdef HJ_DEBUG
+#ifdef PICAS_DEBUG
     RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "execute callback [client callback].");    
 #endif
     execute_client(any_exec.client);
   }
   if (any_exec.waitable) {
-#ifdef HJ_DEBUG
+#ifdef PICAS_DEBUG
     RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "execute callback [waitable callback].");    
 #endif
     any_exec.waitable->execute(any_exec.data);
@@ -923,23 +924,26 @@ Executor::get_next_executable(AnyExecutable & any_executable, std::chrono::nanos
   // Check to see if there are any subscriptions or timers needing service
   // TODO(wjwwood): improve run to run efficiency of this function
 
-  // PiCAS
+#ifdef PICAS
   if (callback_priority_enabled == false) {
-#ifdef HJ_DEBUG
+  #ifdef PICAS_DEBUG
     RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "[get_next_executable] Begin. Call get_next_ready_executable().");
-#endif 
+  #endif 
 
   success = get_next_ready_executable(any_executable);
 
-#ifdef HJ_DEBUG
+  #ifdef PICAS_DEBUG
     if (success) print_list_ready_executable(any_executable);
-#endif 
+  #endif 
   }
+#else
+  success = get_next_ready_executable(any_executable);
+#endif
 
   // If there are none
   if (!success) {
     // Wait for subscriptions or timers to work on
-#ifdef HJ_DEBUG
+#ifdef PICAS_DEBUG
     timeval ctime, ftime;
     double elapsed_time;
     gettimeofday(&ctime, NULL);
@@ -947,7 +951,7 @@ Executor::get_next_executable(AnyExecutable & any_executable, std::chrono::nanos
 
     wait_for_work(timeout);
 
-#ifdef HJ_DEBUG
+#ifdef PICAS_DEBUG
     gettimeofday(&ftime, NULL);
     elapsed_time = (ftime.tv_sec - ctime.tv_sec) * 1.0;
     elapsed_time += (ftime.tv_usec - ctime.tv_usec) / 1000000.0;
@@ -959,14 +963,14 @@ Executor::get_next_executable(AnyExecutable & any_executable, std::chrono::nanos
     }
     // Try again
     success = get_next_ready_executable(any_executable);
-#ifdef HJ_DEBUG
+#ifdef PICAS_DEBUG
     if (success) print_list_ready_executable(any_executable);
 #endif
   }
   return success;
 }
 
-#ifdef HJ_DEBUG
+#ifdef PICAS_DEBUG
 void
 Executor::print_list_ready_executable(AnyExecutable & any_executable) {
   // Only one callback of a node is on any_executable, so there exists only one list

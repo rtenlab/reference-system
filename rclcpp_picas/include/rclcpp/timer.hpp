@@ -48,8 +48,9 @@ class TimerBase
 public:
   RCLCPP_SMART_PTR_DEFINITIONS_NOT_COPYABLE(TimerBase)
   
-  // PiCAS
+#ifdef PICAS
   int callback_priority = 0;
+#endif
 
   /// TimerBase constructor
   /**

@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.5)
 
-project(rclcpp_rt)
+project(rclcpp_picas)
 
 find_package(Threads REQUIRED)
 
@@ -32,6 +32,11 @@ if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
   # Hence disabling -Wsign-conversion for now until all those have eventually been fixed.
   # (from https://github.com/ros2/rclcpp/pull/1188#issuecomment-650229140)
   add_compile_options(-Wall -Wextra -Wconversion -Wno-sign-conversion -Wpedantic -Wnon-virtual-dtor -Woverloaded-virtual)
+endif()
+
+# PICAS Executor
+if(${PICAS})
+  add_compile_options(-DPICAS)
 endif()
 
 set(${PROJECT_NAME}_SRCS

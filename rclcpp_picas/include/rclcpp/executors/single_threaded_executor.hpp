@@ -65,7 +65,7 @@ public:
   void
   spin() override;
 
-// add by HJ
+#ifdef PICAS
   RCLCPP_PUBLIC
   void
   spin_rt();
@@ -77,7 +77,8 @@ public:
   RCLCPP_PUBLIC
   void
   spin_deadline(int p, int T, int budget);
-  
+#endif
+
 private:
   RCLCPP_DISABLE_COPY(SingleThreadedExecutor)
 };

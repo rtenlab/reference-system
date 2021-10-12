@@ -401,7 +401,7 @@ public:
   void
   set_memory_strategy(memory_strategy::MemoryStrategy::SharedPtr memory_strategy);
 
-  // PiCAS
+#ifdef PICAS
   bool callback_priority_enabled = false;
   int executor_priority = 0;
   int executor_cpu = 0;
@@ -476,12 +476,14 @@ public:
   {
     if (ptr) ptr->callback_priority = priority;
   }
+#endif
 
 protected:
-  // Add by HJ
+#ifdef PICAS
   RCLCPP_PUBLIC
   void
   print_list_ready_executable(AnyExecutable & any_executable);
+#endif
 
   RCLCPP_PUBLIC
   void

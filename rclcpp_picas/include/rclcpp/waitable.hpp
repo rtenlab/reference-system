@@ -31,9 +31,10 @@ class Waitable
 public:
   RCLCPP_SMART_PTR_DEFINITIONS_NOT_COPYABLE(Waitable)
 
-  // PiCAS 
+#ifdef PICAS
   int callback_priority = 0;
-  
+#endif
+
   RCLCPP_PUBLIC
   virtual ~Waitable() = default;
 

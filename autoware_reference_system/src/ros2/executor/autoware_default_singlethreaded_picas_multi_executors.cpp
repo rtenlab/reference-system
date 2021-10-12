@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "rclcpp/rclcpp_rt.hpp"
+#include "rclcpp/rclcpp.hpp"
 
 #include "reference_system/system/systems.hpp"
 

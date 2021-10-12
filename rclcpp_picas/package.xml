@@ -1,8 +1,8 @@
 <?xml version="1.0"?>
 <?xml-model href="http://download.ros.org/schema/package_format2.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
 <package format="2">
-  <name>rclcpp_rt</name>
-  <version>9.1.0</version>
+  <name>rclcpp_picas</name>
+  <version>9.2.0</version>
   <description>The ROS client library in C++.</description>
   <maintainer email="ivanpauno@ekumenlabs.com">Ivan Paunovic</maintainer>
   <maintainer email="mabel@openrobotics.org">Mabel Zhang</maintainer>
