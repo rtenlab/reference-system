@@ -72,6 +72,15 @@ public:
       settings.cycle_time,
       [this] {timer_callback();});
 #endif
+#ifdef PICAS
+    subscriptions_[0]->callback_priority = settings.callback_priority_1;
+    subscriptions_[1]->callback_priority = settings.callback_priority_2;
+    subscriptions_[2]->callback_priority = settings.callback_priority_3;
+    subscriptions_[3]->callback_priority = settings.callback_priority_4;
+    subscriptions_[4]->callback_priority = settings.callback_priority_5;
+    subscriptions_[5]->callback_priority = settings.callback_priority_6;
+    timer_->callback_priority = settings.callback_priority_7;
+#endif
   }
 
 #ifdef LAT_DEBUG

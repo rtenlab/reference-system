@@ -28,6 +28,9 @@ struct CommandSettings
 {
   std::string node_name;
   std::string input_topic;
+#ifdef PICAS
+  int callback_priority;
+#endif
 };
 
 struct FusionSettings
@@ -37,6 +40,10 @@ struct FusionSettings
   std::string input_1;
   std::string output_topic;
   uint64_t number_crunch_limit;
+#ifdef PICAS
+  int callback_priority_1;
+  int callback_priority_2;
+#endif
 };
 
 struct TransformSettings
@@ -45,6 +52,9 @@ struct TransformSettings
   std::string input_topic;
   std::string output_topic;
   uint64_t number_crunch_limit;
+#ifdef PICAS
+  int callback_priority;
+#endif
 };
 
 struct CyclicSettings
@@ -54,6 +64,15 @@ struct CyclicSettings
   std::string output_topic;
   uint64_t number_crunch_limit;
   std::chrono::nanoseconds cycle_time;
+#ifdef PICAS
+  int callback_priority_1;
+  int callback_priority_2;
+  int callback_priority_3;
+  int callback_priority_4;
+  int callback_priority_5;
+  int callback_priority_6;
+  int callback_priority_7;
+#endif
 };
 
 struct SensorSettings
@@ -61,6 +80,9 @@ struct SensorSettings
   std::string node_name;
   std::string topic_name;
   std::chrono::nanoseconds cycle_time;
+#ifdef PICAS
+  int callback_priority;
+#endif
 };
 }  // namespace nodes
 #endif  // REFERENCE_SYSTEM__NODES__SETTINGS_HPP_

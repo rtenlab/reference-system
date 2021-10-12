@@ -47,6 +47,9 @@ public:
       settings.cycle_time,
       [this] {timer_callback();});
 #endif
+#ifdef PICAS
+    timer_->callback_priority = settings.callback_priority;
+#endif
   }
 
   // To access callback variable for PiCAS
