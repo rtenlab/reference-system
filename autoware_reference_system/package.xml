@@ -15,7 +15,6 @@
   <depend>reference_system</depend>
 
   <depend>rclcpp</depend>
-  <depend>rclcpp_picas</depend>
   <depend>reference_interfaces</depend>
   <depend>rcl_interfaces</depend>
 

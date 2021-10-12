@@ -49,22 +49,6 @@ SingleThreadedExecutor::spin()
 // for sched_deadline
 #include <pthread.h>
 #define gettid() syscall(__NR_gettid)
-#if 0
-#define SCHED_DEADLINE  6
-/* XXX use the proper syscall numbers */
-#ifdef __x86_64__
-#define __NR_sched_setattr      314
-#define __NR_sched_getattr      315
-#endif
-#ifdef __i386__
-#define __NR_sched_setattr      351
-#define __NR_sched_getattr      352
-#endif
-#ifdef __arm__
-#define __NR_sched_setattr      380
-#define __NR_sched_getattr      381
-#endif
-#endif
 struct sched_attr {
     int32_t size;
 
