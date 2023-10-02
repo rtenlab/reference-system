@@ -187,6 +187,10 @@ private:
       {
         return false;
       }
+      else if (Request1->callback_priority >= Request2->callback_priority)
+      {
+        return false;
+      }
       return true;
     }
   };

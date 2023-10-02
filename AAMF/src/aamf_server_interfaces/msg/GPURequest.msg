@@ -9,6 +9,7 @@ uint64 deadline
 int32 kernel_id
 int32 pid
 char chain_priority
+char callback_priority
 uint8[16] uuid
 bool remote
 
