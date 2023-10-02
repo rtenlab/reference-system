@@ -23,7 +23,7 @@
 #include <boost/lexical_cast.hpp>
 #include "rclcpp/rclcpp.hpp"
 
-class aamf_client_wrapper : public rclcpp::Node
+class aamf_client_wrapper
 {
 public:
     aamf_client_wrapper(int chain_priority, rclcpp::Publisher<aamf_server_interfaces::msg::GPURequest>::SharedPtr request_publisher, rclcpp::Publisher<aamf_server_interfaces::msg::GPURegister>::SharedPtr reg_publisher,
@@ -42,17 +42,49 @@ public:
         this->detach_gemm_shm(this->gemm_shm);
         this->detach_tpu_shm(this->tpu_shm);
     }
-
+    void aamf_tpu_wrapper(bool sleep)
+    {
+        if (!this->handshake_complete)
+        {
+            return;
+        }
+        this->send_tpu_request();
+        if (sleep)
+        {
+            this->sleep_on_tpu_ready();
+        }
+        else
+        {
+            this->wait_on_tpu_ready();
+        }
+    }
+    void aamf_gemm_wrapper(bool sleep)
+    {
+        if (!this->handshake_complete)
+        {
+            return;
+        }
+        this->send_gemm_request();
+        if (sleep)
+        {
+            this->sleep_on_gemm_ready();
+        }
+        else
+        {
+            this->wait_on_gemm_ready();
+        }
+    }
 private:
     int pid;
     struct tpu_struct *tpu_shm = nullptr;
     struct gemm_struct *gemm_shm = nullptr;
     int chain_priority;
     bool handshake_complete = false;
-    std::unordered_map<std::string, int> key_map;
     boost::uuids::uuid uuid;
     uint8_t *uuid_char;
     std::array<uint8_t, 16> uuid_array;
+    std::unordered_map<std::string, int> key_map;
+    std::string input_file = "/home/aamf/Research/AAMF-RTAS/src/aamf_server/test_data/resized_cat.bmp";
     rclcpp::Publisher<aamf_server_interfaces::msg::GPURequest>::SharedPtr request_publisher_;
     rclcpp::Publisher<aamf_server_interfaces::msg::GPURegister>::SharedPtr reg_publisher_;
     rclcpp::Subscription<aamf_server_interfaces::msg::GPURegister>::SharedPtr register_sub_;
@@ -153,12 +185,13 @@ private:
             *out_channels = channels;
         return image;
     }
-    void wait_on_gemm_ready(struct gemm_struct *gemm_shm)
+    void wait_on_gemm_ready()
     {
-        while (!gemm_shm->ready)
+        while (!this->gemm_shm->ready)
             ;
-        gemm_shm->ready = false;
+        this->gemm_shm->ready = false;
     }
+
     void make_tpu_goal(struct tpu_struct *goal_struct)
     {
         auto image = ReadBmpImage(this->input_file.c_str(), &goal_struct->request.image_width,
@@ -168,27 +201,11 @@ private:
     }
     void wait_on_tpu_ready()
     {
-        while (!this->tpu_shm->ready && rclcpp::ok())
+        while (!this->tpu_shm->ready)
             ;
         this->tpu_shm->ready = false;
     }
-    void aamf_tpu_wrapper(bool sleep)
-    {
-        if (!this->handshake_complete)
-        {
-            RCLCPP_INFO(this->get_logger(), "Handshake Not Complete");
-            return;
-        }
-        this->send_tpu_request();
-        if (sleep)
-        {
-            this->sleep_on_tpu_ready();
-        }
-        else
-        {
-            this->wait_on_tpu_ready();
-        }
-    }
+
     void make_gemm_goal(struct gemm_struct *goal_struct)
     {
         unsigned matArow = 1675, matAcol = 1675;
@@ -230,7 +247,6 @@ private:
         int success = shmdt(gemm_shm);
         if (success == -1)
         {
-            RCLCPP_INFO(this->get_logger(), "Shmdt failed, errno: %i", errno);
         }
     }
     void detach_tpu_shm(struct tpu_struct *tpu_shm)
@@ -238,26 +254,9 @@ private:
         int success = shmdt(tpu_shm);
         if (success == -1)
         {
-            RCLCPP_INFO(this->get_logger(), "Shmdt failed, errno: %i", errno);
         }
     }
-    void aamf_gemm_wrapper(bool sleep)
-    {
-        if (!this->handshake_complete)
-        {
-            RCLCPP_INFO(this->get_logger(), "Handshake Not Complete");
-            return;
-        }
-        this->send_gemm_request();
-        if (sleep)
-        {
-            this->sleep_on_gemm_ready();
-        }
-        else
-        {
-            this->wait_on_gemm_ready();
-        }
-    }
+
     boost::uuids::uuid toBoostUUID(const std::array<uint8_t, 16> &arr)
     {
         boost::uuids::uuid uuid;
@@ -266,13 +265,10 @@ private:
     }
     void handshake_callback(aamf_server_interfaces::msg::GPURegister::SharedPtr request)
     {
-        // if (strcmp(request->callback_name.data.c_str(), this->get_name()))
         boost::uuids::uuid incoming_uuid = this->toBoostUUID(request->uuid);
 
-        // memcpy(&incoming_uuid, &request->uuid, 16);
         if (incoming_uuid != uuid)
         {
-            RCLCPP_INFO(this->get_logger(), "Handshake Not For Me");
             return;
         }
 
@@ -287,7 +283,6 @@ private:
     }
     void send_handshake(void)
     {
-        RCLCPP_INFO(this->get_logger(), "Sending Handshake");
         aamf_server_interfaces::msg::GPURegister message;
         message.should_register = true;
         message.pid = getpid();
@@ -300,7 +295,6 @@ private:
         message.chain_priority = chain_priority; // 1-99
         message.uuid = uuid_array;
         reg_publisher_->publish(message);
-        RCLCPP_INFO(this->get_logger(), "Handshake Sent");
     }
     void write_to_shm()
     {
@@ -316,12 +310,10 @@ private:
                 int gemm_shmid = shmget(key, sizeof(struct gemm_struct), 0666 | IPC_CREAT); // Get the shmid
                 if (gemm_shmid == -1)
                 {
-                    RCLCPP_INFO(this->get_logger(), "GEMM Shmget failed, errno: %i", errno);
                 }
                 this->gemm_shm = (struct gemm_struct *)shmat(gemm_shmid, (void *)0, 0);
                 if (gemm_shm == (void *)-1)
                 {
-                    RCLCPP_INFO(this->get_logger(), "GEMM Shmat failed, errno: %i", errno);
                 }
             }
             else if (kernel == "TPU")
@@ -329,17 +321,14 @@ private:
                 int tpu_shmid = shmget(key, sizeof(struct tpu_struct), 0666 | IPC_CREAT); // Get the shmid
                 if (tpu_shmid == -1)
                 {
-                    RCLCPP_INFO(this->get_logger(), "TPU Shmget failed, errno: %i", errno);
                 }
                 this->tpu_shm = (struct tpu_struct *)shmat(tpu_shmid, (void *)0, 0);
                 if (tpu_shm == (void *)-1)
                 {
-                    RCLCPP_INFO(this->get_logger(), "TPU Shmat failed, errno: %i", errno);
                 }
             }
             else
             {
-                RCLCPP_INFO(this->get_logger(), "Kernel Type Unsupported: %s", kernel.c_str());
             }
         }
     }

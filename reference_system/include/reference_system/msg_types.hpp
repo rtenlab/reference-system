@@ -17,8 +17,6 @@
 #include "reference_interfaces/msg/message4kb.hpp"
 #include "aamf_server_interfaces/msg/gpu_request.hpp" 
 #include "aamf_server_interfaces/msg/gpu_register.hpp"
-#include "aamf_structs.h"
-
 
 using message_t = reference_interfaces::msg::Message4kb;
 
