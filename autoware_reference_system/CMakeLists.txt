@@ -1,5 +1,7 @@
 cmake_minimum_required(VERSION 3.5)
 project(autoware_reference_system)
+find_package(OpenCV REQUIRED)
+include_directories(${OpenCV_INCLUDE_DIRS})
 
 # pass in via command line or set to True to test if platform is supported
 message(STATUS "TEST_PLATFORM=${TEST_PLATFORM}")
@@ -169,6 +171,8 @@ if(${BUILD_TESTING})
     endif()
 
     # include cmake functions to use later on
+    include_directories(../AAMF/include)
+
     include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/test_requirements.cmake)
     include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/generate_traces.cmake)
     include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/generate_report.cmake)
