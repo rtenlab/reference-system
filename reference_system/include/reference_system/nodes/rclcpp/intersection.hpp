@@ -62,8 +62,8 @@ namespace nodes
           *aamf_client_[i] = aamf_client_wrapper(connections_[i].subscription->callback_priority, connections_[i].subscription->callback_priority,
                                                  request_publisher_, reg_publisher_);
           this->register_sub_[i] = this->create_subscription<aamf_server_interfaces::msg::GPURegister>("handshake_topic", 100,
-          [this, i](const aamf_server_interfaces::msg::GPURegister::SharedPtr msg)
-          { aamf_client_[i]->handshake_callback(msg); });
+                                                                                                       [this, i](const aamf_server_interfaces::msg::GPURegister::SharedPtr msg)
+                                                                                                       { aamf_client_[i]->handshake_callback(msg); });
           aamf_client_[i]->register_subscriber(register_sub_[i]);
           aamf_client_[i]->send_handshake();
         }
@@ -75,7 +75,9 @@ namespace nodes
       {
         uint64_t timestamp = now_as_int();
         auto number_cruncher_result = number_cruncher(connections_[id].number_crunch_limit);
-
+#ifdef AAMF
+        aamf_client_[id]->aamf_gemm_wrapper(true);
+#endif
         auto output_message = connections_[id].publisher->borrow_loaned_message();
         output_message.get().size = 0;
         merge_history_into_sample(output_message.get(), input_message);

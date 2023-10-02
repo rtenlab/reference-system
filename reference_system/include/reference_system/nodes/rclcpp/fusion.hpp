@@ -54,17 +54,16 @@ namespace nodes
 #ifdef AAMF
         this->request_publisher_ = this->create_publisher<aamf_server_interfaces::msg::GPURequest>("request_topic", 10);
         this->reg_publisher_ = this->create_publisher<aamf_server_interfaces::msg::GPURegister>("registration_topic", 10);
-        *aamf_client_1 = aamf_client_wrapper(settings.callback_priority_1, settings.callback_priority_1, request_publisher_, reg_publisher_);
-        this->register_sub_ = this->create_subscription<aamf_server_interfaces::msg::GPURegister>("handshake_topic", 100,
-         [this](const aamf_server_interfaces::msg::GPURegister::SharedPtr msg){ aamf_client_1->handshake_callback(msg); });
-        aamf_client_1->register_subscriber(register_sub_);
-        aamf_client_1->send_handshake();
-
-        *aamf_client_2 = aamf_client_wrapper(settings.callback_priority_1, settings.callback_priority_1, request_publisher_, reg_publisher_);
-        this->register_sub_2 = this->create_subscription<aamf_server_interfaces::msg::GPURegister>("handshake_topic", 100, 
-        [this](const aamf_server_interfaces::msg::GPURegister::SharedPtr msg){ aamf_client_2->handshake_callback(msg); });
-        aamf_client_2->register_subscriber(register_sub_2);
-        aamf_client_2->send_handshake();
+        for (int i = 0; i < 2; i++)
+        {
+          *aamf_client_[i] = aamf_client_wrapper(subscriptions_[i].subscription->callback_priority, subscriptions_[i].subscription->callback_priority,
+                                                 request_publisher_, reg_publisher_);
+          this->register_sub_[i] = this->create_subscription<aamf_server_interfaces::msg::GPURegister>("handshake_topic", 100,
+          [this, i](const aamf_server_interfaces::msg::GPURegister::SharedPtr msg)
+          { aamf_client_[i]->handshake_callback(msg); });
+          aamf_client_[i]->register_subscriber(register_sub_[i]);
+          aamf_client_[i]->send_handshake();
+        }
 #endif
       }
 
@@ -84,7 +83,9 @@ namespace nodes
         }
 
         auto number_cruncher_result = number_cruncher(number_crunch_limit_);
-
+#ifdef AAMF
+        aamf_client_[input_number]->aamf_gemm_wrapper(true);
+#endif
         auto output_message = publisher_->borrow_loaned_message();
 
         uint32_t missed_samples = get_missed_samples_and_update_seq_nr(
@@ -119,12 +120,10 @@ namespace nodes
 
       subscription_t subscriptions_[2];
 #ifdef AAMF
-      aamf_client_wrapper *aamf_client_1;
-      aamf_client_wrapper *aamf_client_2;
+      aamf_client_wrapper *aamf_client_[2];
       rclcpp::Publisher<aamf_server_interfaces::msg::GPURequest>::SharedPtr request_publisher_;
       rclcpp::Publisher<aamf_server_interfaces::msg::GPURegister>::SharedPtr reg_publisher_;
-      rclcpp::Subscription<aamf_server_interfaces::msg::GPURegister>::SharedPtr register_sub_;
-      rclcpp::Subscription<aamf_server_interfaces::msg::GPURegister>::SharedPtr register_sub_2;
+      rclcpp::Subscription<aamf_server_interfaces::msg::GPURegister>::SharedPtr register_sub_[2];
 #endif
       uint64_t number_crunch_limit_;
       uint32_t sequence_number_ = 0;

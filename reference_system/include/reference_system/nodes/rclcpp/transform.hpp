@@ -62,7 +62,9 @@ namespace nodes
       {
         uint64_t timestamp = now_as_int();
         auto number_cruncher_result = number_cruncher(number_crunch_limit_);
-
+#ifdef AAMF
+        aamf_client_->aamf_gemm_wrapper(true);
+#endif
         auto output_message = publisher_->borrow_loaned_message();
         output_message.get().size = 0;
         merge_history_into_sample(output_message.get(), input_message);

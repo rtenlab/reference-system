@@ -359,4 +359,4 @@ private:
         request_publisher_->publish(std::move(gemm_message));
     }
 };
-#endif // REFERENCE_SYSTEM__NUMBER_CRUNCHER_HPP_
+#endif // REFERENCE_SYSTEM__AAMF_WRAPPERS_HPP_
