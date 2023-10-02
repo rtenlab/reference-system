@@ -22,58 +22,77 @@
 #include "reference_system/number_cruncher.hpp"
 #include "reference_system/sample_management.hpp"
 #include "reference_system/msg_types.hpp"
-
+#ifdef AAMF
+#include "reference_system/aamf_wrappers.hpp"
+#endif
 namespace nodes
 {
-namespace rclcpp_system
-{
-
-class Transform : public rclcpp::Node
-{
-public:
-  explicit Transform(const TransformSettings & settings)
-  : Node(settings.node_name),
-    number_crunch_limit_(settings.number_crunch_limit)
+  namespace rclcpp_system
   {
-    subscription_ = this->create_subscription<message_t>(
-      settings.input_topic, 1,
-      [this](const message_t::SharedPtr msg) {input_callback(msg);});
-    publisher_ = this->create_publisher<message_t>(settings.output_topic, 1);
+
+    class Transform : public rclcpp::Node
+    {
+    public:
+      explicit Transform(const TransformSettings &settings)
+          : Node(settings.node_name),
+            number_crunch_limit_(settings.number_crunch_limit)
+      {
+        subscription_ = this->create_subscription<message_t>(
+            settings.input_topic, 1,
+            [this](const message_t::SharedPtr msg)
+            { input_callback(msg); });
+        publisher_ = this->create_publisher<message_t>(settings.output_topic, 1);
 #ifdef PICAS
-    subscription_->callback_priority = settings.callback_priority;
+        subscription_->callback_priority = settings.callback_priority;
 #endif
-  }
+#ifdef AAMF
+        this->request_publisher_ = this->create_publisher<aamf_server_interfaces::msg::GPURequest>("request_topic", 10);
+        this->reg_publisher_ = this->create_publisher<aamf_server_interfaces::msg::GPURegister>("registration_topic", 10);
+        *aamf_client_ = aamf_client_wrapper(settings.callback_priority, settings.callback_priority, request_publisher_, reg_publisher_);
+        // this->register_sub_ = this->create_subscription<aamf_server_interfaces::msg::GPURegister>("handshake_topic", 100, std::bind(&aamf_client_->handshake_callback, this, std::placeholders::_1));
+        this->register_sub_ = this->create_subscription<aamf_server_interfaces::msg::GPURegister>("handshake_topic", 100, [this](const aamf_server_interfaces::msg::GPURegister::SharedPtr msg)
+                                                                                                  { aamf_client_->handshake_callback(msg); });
+        aamf_client_->register_subscriber(register_sub_);
+        aamf_client_->send_handshake();
+#endif
+      }
 
-private:
-  void input_callback(const message_t::SharedPtr input_message)
-  {
-    uint64_t timestamp = now_as_int();
-    auto number_cruncher_result = number_cruncher(number_crunch_limit_);
+    private:
+      void input_callback(const message_t::SharedPtr input_message)
+      {
+        uint64_t timestamp = now_as_int();
+        auto number_cruncher_result = number_cruncher(number_crunch_limit_);
 
-    auto output_message = publisher_->borrow_loaned_message();
-    output_message.get().size = 0;
-    merge_history_into_sample(output_message.get(), input_message);
+        auto output_message = publisher_->borrow_loaned_message();
+        output_message.get().size = 0;
+        merge_history_into_sample(output_message.get(), input_message);
 
-    uint32_t missed_samples = get_missed_samples_and_update_seq_nr(
-      input_message,
-      input_sequence_number_);
+        uint32_t missed_samples = get_missed_samples_and_update_seq_nr(
+            input_message,
+            input_sequence_number_);
 
-    set_sample(
-      this->get_name(), sequence_number_++, missed_samples, timestamp,
-      output_message.get());
+        set_sample(
+            this->get_name(), sequence_number_++, missed_samples, timestamp,
+            output_message.get());
 
-    // use result so that it is not optimizied away by some clever compiler
-    output_message.get().data[0] = number_cruncher_result;
-    publisher_->publish(std::move(output_message));
-  }
+        // use result so that it is not optimizied away by some clever compiler
+        output_message.get().data[0] = number_cruncher_result;
+        publisher_->publish(std::move(output_message));
+      }
 
-private:
-  rclcpp::Publisher<message_t>::SharedPtr publisher_;
-  rclcpp::Subscription<message_t>::SharedPtr subscription_;
-  uint64_t number_crunch_limit_;
-  uint32_t sequence_number_ = 0;
-  uint32_t input_sequence_number_ = 0;
-};
-}  // namespace rclcpp_system
-}  // namespace nodes
-#endif  // REFERENCE_SYSTEM__NODES__RCLCPP__TRANSFORM_HPP_
+    private:
+      rclcpp::Publisher<message_t>::SharedPtr publisher_;
+      rclcpp::Subscription<message_t>::SharedPtr subscription_;
+      uint64_t number_crunch_limit_;
+      uint32_t sequence_number_ = 0;
+      uint32_t input_sequence_number_ = 0;
+#ifdef AAMF
+      aamf_client_wrapper *aamf_client_;
+      rclcpp::Publisher<aamf_server_interfaces::msg::GPURequest>::SharedPtr request_publisher_;
+      rclcpp::Publisher<aamf_server_interfaces::msg::GPURegister>::SharedPtr reg_publisher_;
+      rclcpp::Subscription<aamf_server_interfaces::msg::GPURegister>::SharedPtr register_sub_;
+#endif
+    };
+  } // namespace rclcpp_system
+} // namespace nodes
+#endif // REFERENCE_SYSTEM__NODES__RCLCPP__TRANSFORM_HPP_

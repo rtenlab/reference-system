@@ -19,7 +19,6 @@
 #include "reference_system/nodes/rclcpp/cyclic.hpp"
 #include "reference_system/nodes/rclcpp/sensor.hpp"
 #include "reference_system/nodes/rclcpp/intersection.hpp"
-#include "reference_system/aamf_wrappers.hpp"
 struct RclcppSystem
 {
   using NodeBaseType = rclcpp::Node;

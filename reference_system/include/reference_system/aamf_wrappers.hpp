@@ -26,17 +26,15 @@
 class aamf_client_wrapper
 {
 public:
-    aamf_client_wrapper(int chain_priority, rclcpp::Publisher<aamf_server_interfaces::msg::GPURequest>::SharedPtr request_publisher, rclcpp::Publisher<aamf_server_interfaces::msg::GPURegister>::SharedPtr reg_publisher,
-                        rclcpp::Subscription<aamf_server_interfaces::msg::GPURegister>::SharedPtr register_sub, struct tpu_struct *tpu_shm_, struct gemm_struct *gemm_shm_)
-        : chain_priority(chain_priority), request_publisher_(request_publisher), reg_publisher_(reg_publisher), register_sub_(register_sub), tpu_shm(tpu_shm_), gemm_shm(gemm_shm_)
-    {
+    aamf_client_wrapper(int callback_priority_, int chain_priority, rclcpp::Publisher<aamf_server_interfaces::msg::GPURequest>::SharedPtr request_publisher, rclcpp::Publisher<aamf_server_interfaces::msg::GPURegister>::SharedPtr reg_publisher)
+        : callback_priority(callback_priority_), chain_priority(chain_priority), request_publisher_(request_publisher), reg_publisher_(reg_publisher){
         this->pid = getpid();
         this->uuid = boost::uuids::random_generator()();
         std::vector<uint8_t> v(this->uuid.size());
         std::copy(this->uuid.begin(), this->uuid.end(), v.begin());
         std::copy_n(v.begin(), 16, uuid_array.begin());
-        this->send_handshake();
     }
+
     ~aamf_client_wrapper()
     {
         this->detach_gemm_shm(this->gemm_shm);
@@ -74,12 +72,52 @@ public:
             this->wait_on_gemm_ready();
         }
     }
+    void send_handshake(void)
+    {
+        aamf_server_interfaces::msg::GPURegister message;
+        message.should_register = true;
+        message.pid = getpid();
+        std_msgs::msg::String data;
+        data.data = "GEMM";
+        message.kernels.push_back(data);
+        data.data = "TPU";
+        message.kernels.push_back(data);
+        message.priority = 0;                    // 1-99
+        message.chain_priority = chain_priority; // 1-99
+        message.callback_priority = callback_priority;
+        message.uuid = uuid_array;
+        reg_publisher_->publish(message);
+    }
+    void register_subscriber(rclcpp::Subscription<aamf_server_interfaces::msg::GPURegister>::SharedPtr register_sub)
+    {
+        this->register_sub_ = register_sub;
+    }
+    void handshake_callback(aamf_server_interfaces::msg::GPURegister::SharedPtr request)
+    {
+        boost::uuids::uuid incoming_uuid = this->toBoostUUID(request->uuid);
+
+        if (incoming_uuid != uuid)
+        {
+            return;
+        }
+
+        for (unsigned long i = 0; i < request->keys.size(); i++)
+        {
+            key_map.insert(std::make_pair(request->kernels.at(i).data, request->keys.at(i)));
+        }
+
+        this->attach_to_shm();
+        this->write_to_shm();
+        this->handshake_complete = true;
+    }
+
 private:
     int pid;
     struct tpu_struct *tpu_shm = nullptr;
     struct gemm_struct *gemm_shm = nullptr;
     int chain_priority;
     bool handshake_complete = false;
+    int callback_priority;
     boost::uuids::uuid uuid;
     uint8_t *uuid_char;
     std::array<uint8_t, 16> uuid_array;
@@ -108,9 +146,9 @@ private:
         this->populateLoanedTPUMessage(tpu_message, chain_priority);
         request_publisher_->publish(std::move(tpu_message));
     }
-    const size_t kBmpFileHeaderSize = 14;
-    const size_t kBmpInfoHeaderSize = 40;
-    const size_t kBmpHeaderSize = kBmpFileHeaderSize + kBmpInfoHeaderSize;
+    size_t kBmpFileHeaderSize = 14;
+    size_t kBmpInfoHeaderSize = 40;
+    size_t kBmpHeaderSize = kBmpFileHeaderSize + kBmpInfoHeaderSize;
 
     int32_t ToInt32(const char p[4])
     {
@@ -263,39 +301,7 @@ private:
         std::copy(arr.begin(), arr.end(), uuid.begin());
         return uuid;
     }
-    void handshake_callback(aamf_server_interfaces::msg::GPURegister::SharedPtr request)
-    {
-        boost::uuids::uuid incoming_uuid = this->toBoostUUID(request->uuid);
 
-        if (incoming_uuid != uuid)
-        {
-            return;
-        }
-
-        for (unsigned long i = 0; i < request->keys.size(); i++)
-        {
-            key_map.insert(std::make_pair(request->kernels.at(i).data, request->keys.at(i)));
-        }
-
-        this->attach_to_shm();
-        this->write_to_shm();
-        this->handshake_complete = true;
-    }
-    void send_handshake(void)
-    {
-        aamf_server_interfaces::msg::GPURegister message;
-        message.should_register = true;
-        message.pid = getpid();
-        std_msgs::msg::String data;
-        data.data = "GEMM";
-        message.kernels.push_back(data);
-        data.data = "TPU";
-        message.kernels.push_back(data);
-        message.priority = 0;                    // 1-99
-        message.chain_priority = chain_priority; // 1-99
-        message.uuid = uuid_array;
-        reg_publisher_->publish(message);
-    }
     void write_to_shm()
     {
         this->make_gemm_goal(this->gemm_shm);

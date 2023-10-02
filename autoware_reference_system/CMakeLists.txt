@@ -46,6 +46,9 @@ endif()
 if(${PICAS})
   add_compile_options(-DPICAS)
 endif()
+if(${AAMF})
+  add_compile_options(-DAAMF)
+endif()
 
 find_package(ament_cmake_auto REQUIRED)
 ament_auto_find_build_dependencies()
@@ -171,8 +174,7 @@ if(${BUILD_TESTING})
     endif()
 
     # include cmake functions to use later on
-    include_directories(../AAMF/include)
-
+    include_directories(/home/aamf/Research/reference-system/AAMF/include)
     include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/test_requirements.cmake)
     include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/generate_traces.cmake)
     include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/generate_report.cmake)

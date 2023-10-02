@@ -13,6 +13,7 @@ endif()
 
 find_package(ament_cmake_auto REQUIRED)
 ament_auto_find_build_dependencies()
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../../AAMF/include)
 
 # Add header-only library
 add_library(${PROJECT_NAME} INTERFACE)
