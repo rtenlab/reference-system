@@ -1,0 +1,12 @@
+float32[1000000] a_h
+float32[1000000] b_h
+uint32 priority
+uint32 a_sz
+uint32 b_sz
+uint32 c_sz
+uint32 matarow
+uint32 matacol
+uint32 matbrow
+uint32 matbcol
+uint32 matcrow
+uint32 matccol

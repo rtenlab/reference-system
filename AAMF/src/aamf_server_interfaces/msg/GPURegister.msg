@@ -1,0 +1,10 @@
+bool should_register 
+bool remote
+int32 pid
+std_msgs/String[] kernels
+int32[] keys
+char priority
+char chain_priority
+uint8[16] uuid
+std_msgs/String callback_name
+std_msgs/String[] devices
