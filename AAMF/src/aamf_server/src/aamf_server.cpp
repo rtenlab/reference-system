@@ -57,7 +57,7 @@ using namespace std::chrono_literals;
 using namespace cv::dnn;
 using namespace cv;
 using namespace std;
-#define OVERHEAD_DEBUG
+//#define OVERHEAD_DEBUG
 
 #ifdef OVERHEAD_DEBUG
 // std::ofstream ex_time;
@@ -302,7 +302,7 @@ private:
   std::vector<std::string> load_class_list()
   {
     std::vector<std::string> class_list;
-    std::ifstream ifs("/home/aamf/Research/AAMF/src/aamf_server/net/classes.txt");
+    std::ifstream ifs("/home/aamf/Research/AAMF-RTAS/src/aamf_server/net/classes.txt");
     std::string line;
     while (getline(ifs, line))
     {
@@ -313,7 +313,7 @@ private:
 
   void load_net(cv::dnn::Net &net)
   {
-    auto result = cv::dnn::readNet("/home/aamf/Research/AAMF/src/aamf_server/net/yolov5s.onnx");
+    auto result = cv::dnn::readNet("/home/aamf/Research/AAMF-RTAS/src/aamf_server/net/yolov5s.onnx");
     result.setPreferableBackend(cv::dnn::DNN_BACKEND_CUDA);
     result.setPreferableTarget(cv::dnn::DNN_TARGET_CUDA);
     net = result;
@@ -342,7 +342,7 @@ private:
         continue;
       }
 
-      // RCLCPP_INFO(this->get_logger(), "Popping Request From Queue");
+      RCLCPP_INFO(this->get_logger(), "Popping Request From Queue");
       auto active_request = stream_queues[cv_worker].top();
       stream_queues[cv_worker].pop();
       stream_queue_mutex[cv_worker].unlock();
@@ -469,7 +469,7 @@ private:
 #endif
       // stream_queue_mutex[stream_id].lock();
 
-      ////RCLCPP_INFO(this->get_logger(), "Popping Request From Queue");
+      RCLCPP_INFO(this->get_logger(), "Popping Request From Queue");
       auto active_request = stream_queues[stream_id].top();
       if (active_request == nullptr)
       {
@@ -489,7 +489,7 @@ private:
       std::string callback_uuid = this->toHexString(active_request->uuid);
       if (this->callback_key_map.find(callback_uuid) == callback_key_map.end())
       {
-        // RCLCPP_INFO(this->get_logger(), "Request invalid");
+        RCLCPP_INFO(this->get_logger(), "Request invalid");
         continue;
       }
       auto key = &(*this->callback_key_map.find(callback_uuid)).second;
@@ -516,12 +516,12 @@ private:
           key->data_in_use = true;
           run_hist(key->hist_request, custom_stream_id, &key->data_in_use); // if prioritized cuda stream, run independently
         }
-        // RCLCPP_INFO(this->get_logger(), "Request from %s Succeeded", callback_uuid.c_str());
+        RCLCPP_INFO(this->get_logger(), "Request from %s Succeeded", callback_uuid.c_str());
 
         break;
 
       case 1: // this is the GEMM kernel
-        // RCLCPP_INFO(this->get_logger(), "Running GEMM Kernel");
+        RCLCPP_INFO(this->get_logger(), "Running GEMM Kernel");
 
         if (custom_stream_id == 0)
         {
@@ -533,7 +533,7 @@ private:
           key->data_in_use = true;
           run_sgemm(key->gemm_request, custom_stream_id, &key->data_in_use);
         }
-        // RCLCPP_INFO(this->get_logger(), "Request from %s Succeeded", callback_uuid.c_str());
+        RCLCPP_INFO(this->get_logger(), "Request from %s Succeeded", callback_uuid.c_str());
         break;
       case 4: // this is the VEC kernel
         // RCLCPP_INFO(this->get_logger(), "Running VEC Kernel");
@@ -947,8 +947,8 @@ private:
     //   ss << std::setw(2) << static_cast<unsigned>(request->uuid[i]);
     // }
     std::string callback_uuid = this->toHexString(request->uuid);
-    // RCLCPP_INFO(this->get_logger(), "Registration Request Received for Callback:  %s",
-    // callback_uuid.c_str());
+    RCLCPP_INFO(this->get_logger(), "Registration Request Received for Callback:  %s",
+    callback_uuid.c_str());
     if (request->should_register) // If this is a creation request
     {
       pthread_mutexattr_t psharedm;
@@ -984,13 +984,13 @@ private:
           int gemm_id = shmget(key, sizeof(struct gemm_struct), 0666 | IPC_CREAT);
           if (gemm_id == -1)
           {
-            // RCLCPP_INFO(this->get_logger(), "Shmget failed, errno: %i, key: %i, gemm_id: %i", errno, key, gemm_id);
+            RCLCPP_INFO(this->get_logger(), "Shmget failed, errno: %i, key: %i, gemm_id: %i", errno, key, gemm_id);
           }
           uuid_keys.ids.push_back(gemm_id);
           uuid_keys.gemm_request = (struct gemm_struct *)shmat(gemm_id, (void *)0, 0);
           if (uuid_keys.gemm_request == (void *)-1 || uuid_keys.gemm_request == nullptr)
           {
-            // RCLCPP_INFO(this->get_logger(), "Shmat failed, errno: %i", errno);
+            RCLCPP_INFO(this->get_logger(), "Shmat failed, errno: %i", errno);
           }
           (void)pthread_mutex_init(&(uuid_keys.gemm_request->pthread_mutex), &psharedm);
           (void)pthread_cond_init(&(uuid_keys.gemm_request->pthread_cv), &psharedc);
@@ -1065,13 +1065,13 @@ private:
           int tpu_id = shmget(key, sizeof(struct tpu_struct), 0666 | IPC_CREAT);
           if (tpu_id == -1)
           {
-            // RCLCPP_INFO(this->get_logger(), "Shmget failed, errno: %i, key: %i, hist_id: %i", errno, key, tpu_id);
+            RCLCPP_INFO(this->get_logger(), "Shmget failed, errno: %i, key: %i, hist_id: %i", errno, key, tpu_id);
           }
           uuid_keys.ids.push_back(tpu_id);
           uuid_keys.tpu_request = (struct tpu_struct *)shmat(tpu_id, (void *)0, 0);
           if (uuid_keys.tpu_request == (void *)-1 || uuid_keys.tpu_request == nullptr)
           {
-            // RCLCPP_INFO(this->get_logger(), "Shmat failed, errno: %i", errno);
+            RCLCPP_INFO(this->get_logger(), "Shmat failed, errno: %i", errno);
           }
           (void)pthread_mutex_init(&(uuid_keys.tpu_request->pthread_mutex), &psharedm);
           (void)pthread_cond_init(&(uuid_keys.tpu_request->pthread_cv), &psharedc);
@@ -1162,7 +1162,7 @@ private:
 
   inline void enqueue(aamf_server_interfaces::msg::GPURequest::SharedPtr shared_request)
   {
-    // RCLCPP_INFO(this->get_logger(), "Enqueueing GPU Access Request");
+    RCLCPP_INFO(this->get_logger(), "Enqueueing GPU Access Request");
     //  Determine Bucket
     bool notify = false;
     // int bucket = this->find_bucket_for_callback_name(shared_request->callback_name.data);
@@ -1180,8 +1180,8 @@ private:
       bucket = 7;
     }
     // bucket = this->numCudaStreams - 1;
-    // RCLCPP_INFO(this->get_logger(), "Enqueueing Request from Callback %s with executor PID %i to Bucket %i",
-    // callback_uuid.c_str(), shared_request->pid, bucket);
+    RCLCPP_INFO(this->get_logger(), "Enqueueing Request from Callback %s with executor PID %i to Bucket %i",
+    callback_uuid.c_str(), shared_request->pid, bucket);
 
     stream_queue_mutex[bucket].lock(); // queue mutex
     // while (stream_queue_mutex[bucket].try_lock() != 0)

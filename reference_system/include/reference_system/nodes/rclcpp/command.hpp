@@ -45,12 +45,15 @@ namespace nodes
 #ifdef AAMF
         this->request_publisher_ = this->create_publisher<aamf_server_interfaces::msg::GPURequest>("request_topic", 10);
         this->reg_publisher_ = this->create_publisher<aamf_server_interfaces::msg::GPURegister>("registration_topic", 10);
-        *aamf_client_ = aamf_client_wrapper(settings.callback_priority, settings.callback_priority, request_publisher_, reg_publisher_);
+        aamf_client_.push_back(std::make_shared<aamf_client_wrapper>(settings.callback_priority, settings.callback_priority, request_publisher_, reg_publisher_));
         // this->register_sub_ = this->create_subscription<aamf_server_interfaces::msg::GPURegister>("handshake_topic", 100, std::bind(&aamf_client_->handshake_callback, this, std::placeholders::_1));
-        this->register_sub_ = this->create_subscription<aamf_server_interfaces::msg::GPURegister>("handshake_topic", 100, [this](const aamf_server_interfaces::msg::GPURegister::SharedPtr msg)
-                                                                                                  { aamf_client_->handshake_callback(msg); });
-        aamf_client_->register_subscriber(register_sub_);
-        aamf_client_->send_handshake();
+        this->register_sub_ = this->create_subscription<aamf_server_interfaces::msg::GPURegister>("handshake_topic", 100,
+        [this, &aamf_client_ptr = aamf_client_[0]](const aamf_server_interfaces::msg::GPURegister::SharedPtr msg)
+        { aamf_client_ptr->handshake_callback(msg); });
+        register_sub_->callback_priority = 99;
+        aamf_client_[0]->register_subscriber(register_sub_);
+        aamf_client_[0]->send_handshake();
+
 #endif
       }
 
@@ -65,7 +68,7 @@ namespace nodes
       rclcpp::Subscription<message_t>::SharedPtr subscription_;
       uint32_t sequence_number_ = 0;
 #ifdef AAMF
-      aamf_client_wrapper *aamf_client_;
+      std::vector<std::shared_ptr<aamf_client_wrapper>> aamf_client_;
       rclcpp::Publisher<aamf_server_interfaces::msg::GPURequest>::SharedPtr request_publisher_;
       rclcpp::Publisher<aamf_server_interfaces::msg::GPURegister>::SharedPtr reg_publisher_;
       rclcpp::Subscription<aamf_server_interfaces::msg::GPURegister>::SharedPtr register_sub_;

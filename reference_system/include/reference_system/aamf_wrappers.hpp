@@ -27,7 +27,8 @@ class aamf_client_wrapper
 {
 public:
     aamf_client_wrapper(int callback_priority_, int chain_priority, rclcpp::Publisher<aamf_server_interfaces::msg::GPURequest>::SharedPtr request_publisher, rclcpp::Publisher<aamf_server_interfaces::msg::GPURegister>::SharedPtr reg_publisher)
-        : callback_priority(callback_priority_), chain_priority(chain_priority), request_publisher_(request_publisher), reg_publisher_(reg_publisher){
+        : callback_priority(callback_priority_), chain_priority(chain_priority), request_publisher_(request_publisher), reg_publisher_(reg_publisher)
+    {
         this->pid = getpid();
         this->uuid = boost::uuids::random_generator()();
         std::vector<uint8_t> v(this->uuid.size());
@@ -98,6 +99,7 @@ public:
 
         if (incoming_uuid != uuid)
         {
+            //std::printf("Handshake not for me\n");
             return;
         }
 
@@ -108,7 +110,31 @@ public:
 
         this->attach_to_shm();
         this->write_to_shm();
+        std::printf("Handshake Complete\n");
+
         this->handshake_complete = true;
+    }
+    aamf_client_wrapper &operator=(const aamf_client_wrapper &other)
+    {
+        if (this != &other)
+        {
+            // Copy the data members
+            pid = other.pid;
+            tpu_shm = other.tpu_shm;
+            gemm_shm = other.gemm_shm;
+            chain_priority = other.chain_priority;
+            handshake_complete = other.handshake_complete;
+            callback_priority = other.callback_priority;
+            uuid = other.uuid;
+            uuid_char = other.uuid_char;
+            uuid_array = other.uuid_array;
+            key_map = other.key_map;
+            input_file = other.input_file;
+            request_publisher_ = other.request_publisher_;
+            reg_publisher_ = other.reg_publisher_;
+            register_sub_ = other.register_sub_;
+        }
+        return *this;
     }
 
 private:
@@ -285,6 +311,7 @@ private:
         int success = shmdt(gemm_shm);
         if (success == -1)
         {
+            std::printf("Failed to detach from shared memory\n");
         }
     }
     void detach_tpu_shm(struct tpu_struct *tpu_shm)
@@ -292,6 +319,7 @@ private:
         int success = shmdt(tpu_shm);
         if (success == -1)
         {
+            std::printf("Failed to detach from shared memory\n");
         }
     }
 
@@ -316,10 +344,12 @@ private:
                 int gemm_shmid = shmget(key, sizeof(struct gemm_struct), 0666 | IPC_CREAT); // Get the shmid
                 if (gemm_shmid == -1)
                 {
+                    std::printf("Failed to get shared memory\n");
                 }
                 this->gemm_shm = (struct gemm_struct *)shmat(gemm_shmid, (void *)0, 0);
                 if (gemm_shm == (void *)-1)
                 {
+                    std::printf("Failed to attach to shared memory\n");
                 }
             }
             else if (kernel == "TPU")
@@ -327,14 +357,17 @@ private:
                 int tpu_shmid = shmget(key, sizeof(struct tpu_struct), 0666 | IPC_CREAT); // Get the shmid
                 if (tpu_shmid == -1)
                 {
+                    std::printf("Failed to get shared memory\n");
                 }
                 this->tpu_shm = (struct tpu_struct *)shmat(tpu_shmid, (void *)0, 0);
                 if (tpu_shm == (void *)-1)
                 {
+                    std::printf("Failed to attach to shared memory\n");
                 }
             }
             else
             {
+                std::printf("Unknown kernel name\n");
             }
         }
     }

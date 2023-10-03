@@ -69,15 +69,25 @@ namespace nodes
 #ifdef AAMF
         this->request_publisher_ = this->create_publisher<aamf_server_interfaces::msg::GPURequest>("request_topic", 10);
         this->reg_publisher_ = this->create_publisher<aamf_server_interfaces::msg::GPURegister>("registration_topic", 10);
-        for(int i = 0; i < 7; i++){
-          *aamf_client_[i] = aamf_client_wrapper(subscriptions_[i].subscription->callback_priority, subscriptions_[i].subscription->callback_priority,
-          request_publisher_, reg_publisher_);
-          this->register_sub_[i] = this->create_subscription<aamf_server_interfaces::msg::GPURegister>("handshake_topic", 100, 
-          [this, i](const aamf_server_interfaces::msg::GPURegister::SharedPtr msg){ aamf_client_[i]->handshake_callback(msg); });
-        
-        aamf_client_[i]->register_subscriber(register_sub_[i]);
-        aamf_client_[i]->send_handshake();
+        for (int i = 0; i < 6; i++)
+        {
+          aamf_client_.push_back(std::make_shared<aamf_client_wrapper>(subscriptions_[i].subscription->callback_priority, subscriptions_[i].subscription->callback_priority,
+                                                                       request_publisher_, reg_publisher_));
+          this->register_sub_[i] = this->create_subscription<aamf_server_interfaces::msg::GPURegister>("handshake_topic", 100, [this, &aamf_client_ptr = aamf_client_[i]](const aamf_server_interfaces::msg::GPURegister::SharedPtr msg)
+                                                                                                       { aamf_client_ptr->handshake_callback(msg); });
+          register_sub_[i]->callback_priority = 99;
+          aamf_client_[i]->register_subscriber(register_sub_[i]);
+          aamf_client_[i]->send_handshake();
         }
+        aamf_client_.push_back(std::make_shared<aamf_client_wrapper>(timer_->callback_priority, timer_->callback_priority,
+                                                                     request_publisher_, reg_publisher_));
+        this->register_sub_[6] = this->create_subscription<aamf_server_interfaces::msg::GPURegister>("handshake_topic", 100,
+                                                                                                     [this](const aamf_server_interfaces::msg::GPURegister::SharedPtr msg)
+                                                                                                     { aamf_client_[6]->handshake_callback(msg); });
+        register_sub_[6]->callback_priority = 99;
+        aamf_client_[6]->register_subscriber(register_sub_[6]);
+        aamf_client_[6]->send_handshake();
+
 #endif
       }
 
@@ -124,7 +134,8 @@ namespace nodes
       rclcpp::Publisher<message_t>::SharedPtr publisher_;
       rclcpp::TimerBase::SharedPtr timer_;
 #ifdef AAMF
-      aamf_client_wrapper *aamf_client_[7];
+      // aamf_client_wrapper *aamf_client_[7];
+      std::vector<std::shared_ptr<aamf_client_wrapper>> aamf_client_;
       rclcpp::Publisher<aamf_server_interfaces::msg::GPURequest>::SharedPtr request_publisher_;
       rclcpp::Publisher<aamf_server_interfaces::msg::GPURegister>::SharedPtr reg_publisher_;
       rclcpp::Subscription<aamf_server_interfaces::msg::GPURegister>::SharedPtr register_sub_[7];
