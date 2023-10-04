@@ -96,6 +96,7 @@ public:
     void handshake_callback(aamf_server_interfaces::msg::GPURegister::SharedPtr request)
     {
         boost::uuids::uuid incoming_uuid = this->toBoostUUID(request->uuid);
+        //while(register_sub_ == nullptr);;
 
         if (incoming_uuid != uuid)
         {
@@ -151,7 +152,7 @@ private:
     std::string input_file = "/home/aamf/Research/AAMF-RTAS/src/aamf_server/test_data/resized_cat.bmp";
     rclcpp::Publisher<aamf_server_interfaces::msg::GPURequest>::SharedPtr request_publisher_;
     rclcpp::Publisher<aamf_server_interfaces::msg::GPURegister>::SharedPtr reg_publisher_;
-    rclcpp::Subscription<aamf_server_interfaces::msg::GPURegister>::SharedPtr register_sub_;
+    rclcpp::Subscription<aamf_server_interfaces::msg::GPURegister>::SharedPtr register_sub_ = nullptr;
 
     void populateLoanedTPUMessage(rclcpp::LoanedMessage<aamf_server_interfaces::msg::GPURequest> &loanedMsg, int chain_priority)
     {

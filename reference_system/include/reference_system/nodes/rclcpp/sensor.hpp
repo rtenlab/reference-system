@@ -36,6 +36,19 @@ namespace nodes
       explicit Sensor(const SensorSettings &settings)
           : Node(settings.node_name)
       {
+
+#ifdef AAMF
+        this->request_publisher_ = this->create_publisher<aamf_server_interfaces::msg::GPURequest>("request_topic", 10);
+        this->reg_publisher_ = this->create_publisher<aamf_server_interfaces::msg::GPURegister>("registration_topic", 10);
+        aamf_client_.push_back(std::make_shared<aamf_client_wrapper>(settings.callback_priority, settings.callback_priority, request_publisher_, reg_publisher_));
+        // this->register_sub_ = this->create_subscription<aamf_server_interfaces::msg::GPURegister>("handshake_topic", 100, std::bind(&aamf_client_->handshake_callback, this, std::placeholders::_1));
+        this->register_sub_.push_back(this->create_subscription<aamf_server_interfaces::msg::GPURegister>("handshake_topic", 100, [this, &aamf_client_ptr = aamf_client_[0]](const aamf_server_interfaces::msg::GPURegister::SharedPtr msg)
+                                                                                                          { aamf_client_ptr->handshake_callback(msg); }));
+        register_sub_[0]->callback_priority = 99;
+
+        aamf_client_[0]->register_subscriber(register_sub_[0]);
+        aamf_client_[0]->send_handshake();
+#endif
         publisher_ = this->create_publisher<message_t>(settings.topic_name, 1);
         timer_ = this->create_wall_timer(
             settings.cycle_time,
@@ -43,18 +56,6 @@ namespace nodes
             { timer_callback(); });
 #ifdef PICAS
         timer_->callback_priority = settings.callback_priority;
-#endif
-#ifdef AAMF
-        this->request_publisher_ = this->create_publisher<aamf_server_interfaces::msg::GPURequest>("request_topic", 10);
-        this->reg_publisher_ = this->create_publisher<aamf_server_interfaces::msg::GPURegister>("registration_topic", 10);
-        aamf_client_.push_back(std::make_shared<aamf_client_wrapper>(settings.callback_priority, settings.callback_priority, request_publisher_, reg_publisher_));
-        // this->register_sub_ = this->create_subscription<aamf_server_interfaces::msg::GPURegister>("handshake_topic", 100, std::bind(&aamf_client_->handshake_callback, this, std::placeholders::_1));
-        this->register_sub_ = this->create_subscription<aamf_server_interfaces::msg::GPURegister>("handshake_topic", 100, [this, &aamf_client_ptr = aamf_client_[0]](const aamf_server_interfaces::msg::GPURegister::SharedPtr msg)
-                                                                                                  { aamf_client_ptr->handshake_callback(msg); });
-        register_sub_->callback_priority = 99;
-
-        aamf_client_[0]->register_subscriber(register_sub_);
-        aamf_client_[0]->send_handshake();
 #endif
       }
 
@@ -64,7 +65,9 @@ namespace nodes
         uint64_t timestamp = now_as_int();
         auto message = publisher_->borrow_loaned_message();
         message.get().size = 0;
-
+#ifdef AAMF
+        aamf_client_[0]->aamf_gemm_wrapper(true);
+#endif
         set_sample(this->get_name(), sequence_number_++, 0, timestamp, message.get());
 
         publisher_->publish(std::move(message));
@@ -78,7 +81,8 @@ namespace nodes
       std::vector<std::shared_ptr<aamf_client_wrapper>> aamf_client_;
       rclcpp::Publisher<aamf_server_interfaces::msg::GPURequest>::SharedPtr request_publisher_;
       rclcpp::Publisher<aamf_server_interfaces::msg::GPURegister>::SharedPtr reg_publisher_;
-      rclcpp::Subscription<aamf_server_interfaces::msg::GPURegister>::SharedPtr register_sub_;
+      // rclcpp::Subscription<aamf_server_interfaces::msg::GPURegister>::SharedPtr register_sub_;
+      std::vector<rclcpp::Subscription<aamf_server_interfaces::msg::GPURegister>::SharedPtr> register_sub_;
 #endif
     };
   } // namespace rclcpp_system
